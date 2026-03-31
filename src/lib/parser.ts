@@ -293,7 +293,7 @@ function parseV1Format(raw: RawSessionV1): ParsedSession {
         id: generateId(),
         role: 'assistant',
         content,
-        timestamp: userTs ? (timeTaken ? userTs + timeTaken : userTs) : assistantTs,
+        timestamp: assistantTs ?? (userTs && timeTaken ? userTs + timeTaken : undefined),
         timeTaken,
         model,
         toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
