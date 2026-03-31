@@ -37,7 +37,7 @@ npm start
 
 ## Tech Stack
 
-- [Next.js 14+](https://nextjs.org/) (App Router)
+- [Next.js 16+](https://nextjs.org/) (App Router)
 - [TypeScript](https://www.typescriptlang.org/)
 - [Tailwind CSS](https://tailwindcss.com/)
 - [react-markdown](https://github.com/remarkjs/react-markdown)

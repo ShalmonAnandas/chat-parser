@@ -14,7 +14,7 @@ import {
 
 let messageIdCounter = 0;
 function generateId(): string {
-  return `msg_${++messageIdCounter}_${Math.random().toString(36).slice(2, 7)}`;
+  return `msg_${++messageIdCounter}_${crypto.randomUUID().slice(0, 8)}`;
 }
 
 function parseTimestamp(ts?: string | number): number | undefined {
