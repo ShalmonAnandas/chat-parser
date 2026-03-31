@@ -3,6 +3,13 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
+    if (!process.env.CHAT_PARSER_READ_WRITE_TOKEN) {
+      return NextResponse.json(
+        { error: 'Blob storage is not configured' },
+        { status: 503 }
+      );
+    }
+
     const body = await request.json();
 
     if (!body || typeof body !== 'object' || !Array.isArray(body.messages)) {

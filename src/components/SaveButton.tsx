@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { ParsedSession } from '@/types/chat';
 
 interface SaveButtonProps {
@@ -8,11 +9,17 @@ interface SaveButtonProps {
 }
 
 export default function SaveButton({ session }: SaveButtonProps) {
+  const { data: authSession } = useSession();
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSave = async () => {
+    if (!authSession?.user) {
+      setError('Please sign in to save chats');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {

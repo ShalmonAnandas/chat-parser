@@ -20,7 +20,7 @@ export async function GET() {
           const res = await fetch(blob.url);
           const data = await res.json();
           return {
-            id: blob.pathname.replace(`saved/${session.user!.id}/`, '').replace('.json', ''),
+            id: blob.pathname.split('/').pop()?.replace('.json', '') ?? blob.pathname,
             title: data.title ?? 'Untitled Chat',
             createdAt: data.createdAt,
             totalMessages: data.totalMessages ?? 0,

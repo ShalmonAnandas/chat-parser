@@ -122,6 +122,15 @@ export default function CodeChangesView({ messages }: CodeChangesViewProps) {
                   change.toolCall.description ??
                   change.toolCall.name;
 
+                // Detect language from file extension
+                const ext = fileName.split('.').pop()?.toLowerCase();
+                const langMap: Record<string, string> = {
+                  ts: 'typescript', tsx: 'typescript', js: 'javascript', jsx: 'javascript',
+                  py: 'python', rs: 'rust', go: 'go', java: 'java', css: 'css',
+                  html: 'html', json: 'json', md: 'markdown', yaml: 'yaml', yml: 'yaml',
+                };
+                const lang = (ext && langMap[ext]) || 'text';
+
                 return (
                   <div key={i} className="rounded-xl border border-zinc-800 overflow-hidden">
                     {/* File header */}
@@ -141,7 +150,7 @@ export default function CodeChangesView({ messages }: CodeChangesViewProps) {
                         <div>
                           <p className="text-[10px] text-red-400 mb-1 uppercase tracking-wider font-medium">Removed</p>
                           <div className="rounded-lg border border-red-500/20 overflow-hidden">
-                            <CodeBlock code={code.oldStr} language="diff" />
+                            <CodeBlock code={code.oldStr} language={lang} />
                           </div>
                         </div>
                       )}
@@ -149,7 +158,7 @@ export default function CodeChangesView({ messages }: CodeChangesViewProps) {
                         <div>
                           <p className="text-[10px] text-emerald-400 mb-1 uppercase tracking-wider font-medium">Added</p>
                           <div className="rounded-lg border border-emerald-500/20 overflow-hidden">
-                            <CodeBlock code={code.newStr} language="diff" />
+                            <CodeBlock code={code.newStr} language={lang} />
                           </div>
                         </div>
                       )}

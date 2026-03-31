@@ -32,9 +32,13 @@ export default function ShareButton({ session }: ShareButtonProps) {
       const url = `${window.location.origin}/shared/${id}`;
       setShareUrl(url);
 
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      try {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        // Clipboard may not be available (e.g. non-HTTPS)
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to share');
     } finally {

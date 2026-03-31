@@ -105,12 +105,17 @@ export default function SavedChatsPage() {
               <button
                 key={chat.id}
                 onClick={() => {
-                  // Store in session and navigate to viewer
                   fetch(`/api/chats/${chat.id}`)
-                    .then((res) => res.json())
+                    .then((res) => {
+                      if (!res.ok) throw new Error('Failed to load chat');
+                      return res.json();
+                    })
                     .then((data) => {
                       sessionStorage.setItem('chat-session', JSON.stringify(data));
                       router.push('/viewer');
+                    })
+                    .catch(() => {
+                      setError('Failed to load chat. Please try again.');
                     });
                 }}
                 className="w-full text-left rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5 hover:border-zinc-700 hover:bg-zinc-900 transition-all"
