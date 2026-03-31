@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useCallback, useState, useRef } from 'react';
 import { parseChatExport } from '@/lib/parser';
+import LoginButton from '@/components/LoginButton';
 
 export default function HomePage() {
   const router = useRouter();
@@ -52,7 +53,12 @@ export default function HomePage() {
   );
 
   return (
-    <main className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center p-6">
+    <main className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center p-6 relative">
+      {/* Top-right login */}
+      <div className="absolute top-4 right-4">
+        <LoginButton />
+      </div>
+
       <div className="w-full max-w-xl">
         {/* Header */}
         <div className="text-center mb-10">
