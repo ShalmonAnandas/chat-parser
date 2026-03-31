@@ -55,3 +55,61 @@ body {
 .animate-pulse-slow {
   animation: pulse-slow 2s ease-in-out infinite;
 }
+
+/* Print styles for PDF export */
+@media print {
+  html, body {
+    background-color: white !important;
+    color: #1a1a1a !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  main {
+    background-color: white !important;
+  }
+
+  /* Remove sticky positioning */
+  .sticky {
+    position: relative !important;
+  }
+
+  /* Make borders visible in print */
+  [class*="border-zinc"] {
+    border-color: #d4d4d8 !important;
+  }
+
+  /* Make backgrounds lighter */
+  [class*="bg-zinc-900"],
+  [class*="bg-zinc-800"],
+  [class*="bg-\\[\\#0a0a0a\\]"] {
+    background-color: #fafafa !important;
+  }
+
+  /* Make text darker for readability */
+  [class*="text-zinc-200"],
+  [class*="text-zinc-300"],
+  [class*="text-zinc-400"] {
+    color: #333 !important;
+  }
+
+  [class*="text-white"] {
+    color: #1a1a1a !important;
+  }
+
+  /* Code blocks */
+  pre {
+    background-color: #f4f4f5 !important;
+    color: #333 !important;
+    border: 1px solid #d4d4d8 !important;
+  }
+
+  /* Avoid page breaks inside messages */
+  .space-y-2 > div {
+    break-inside: avoid;
+  }
+}
