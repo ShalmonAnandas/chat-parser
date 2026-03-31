@@ -12,9 +12,8 @@ import {
   RawToolCallV1,
 } from '@/types/chat';
 
-let messageIdCounter = 0;
 function generateId(): string {
-  return `msg_${++messageIdCounter}_${crypto.randomUUID().slice(0, 8)}`;
+  return `msg_${crypto.randomUUID().slice(0, 16)}`;
 }
 
 function parseTimestamp(ts?: string | number): number | undefined {
@@ -240,8 +239,6 @@ function parseMessageArray(messages: RawMessageV2[]): ParsedSession {
 }
 
 export function parseChatExport(raw: unknown): ParsedSession {
-  messageIdCounter = 0;
-
   if (!raw || typeof raw !== 'object') {
     throw new Error('Invalid JSON: expected an object or array');
   }
@@ -253,8 +250,16 @@ export function parseChatExport(raw: unknown): ParsedSession {
     if (data.length === 0) {
       return { messages: [], totalMessages: 0 };
     }
-    const first = data[0];
-    if (first && typeof first === 'object' && ('message' in first || 'response' in first)) {
+    // Check at least the first two elements (or all if < 2) to determine format
+    const sample = data.slice(0, Math.min(data.length, 2));
+    const isV1Array = sample.every(
+      (item) =>
+        item &&
+        typeof item === 'object' &&
+        ('message' in item || 'response' in item) &&
+        !('role' in item)
+    );
+    if (isV1Array) {
       return parseRequestArray(data as RawRequestV1[]);
     }
     return parseMessageArray(data as RawMessageV2[]);
