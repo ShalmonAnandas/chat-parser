@@ -11,7 +11,7 @@ export default function ThinkingBlock({ blocks }: ThinkingBlockProps) {
   const [expanded, setExpanded] = useState(false);
 
   const totalChars = blocks.reduce((sum, b) => sum + b.content.length, 0);
-  const preview = blocks[0]?.content.slice(0, 150).trim() ?? '';
+  const preview = (blocks[0]?.content.slice(0, 150).replace(/\s+\S*$/, '').trim()) ?? '';
 
   return (
     <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 overflow-hidden">
