@@ -27,12 +27,12 @@ export default function ViewerPage() {
 
   if (error) {
     return (
-      <main className="min-h-screen bg-[#0d1117] flex items-center justify-center">
+      <main className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-400 mb-4">{error}</p>
           <button
             onClick={() => router.push('/')}
-            className="text-[#58a6ff] hover:underline text-sm"
+            className="text-indigo-400 hover:text-indigo-300 text-sm transition-colors"
           >
             ← Go back
           </button>
@@ -43,28 +43,34 @@ export default function ViewerPage() {
 
   if (!session) {
     return (
-      <main className="min-h-screen bg-[#0d1117] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-[#58a6ff] border-t-transparent rounded-full animate-spin" />
+      <main className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#0d1117] py-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
+    <main className="min-h-screen bg-[#0a0a0a]">
+      {/* Top bar */}
+      <div className="sticky top-0 z-10 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-zinc-800/50">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <button
             onClick={() => router.push('/')}
-            className="flex items-center gap-2 text-sm text-[#8b949e] hover:text-[#e6edf3] transition-colors"
+            className="flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
           >
-            ← Upload another file
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+            </svg>
+            Upload another
           </button>
-          <span className="text-xs text-[#6e7681]">Chat Parser</span>
+          <span className="text-xs text-zinc-600 font-medium tracking-wide">Chat Parser</span>
         </div>
+      </div>
 
+      <div className="max-w-5xl mx-auto px-4 py-6">
         <SessionHeader session={session} />
 
-        <div className="rounded-xl border border-[#30363d] bg-[#161b22] p-6">
+        <div className="mt-6">
           <MessageList messages={session.messages} />
         </div>
       </div>

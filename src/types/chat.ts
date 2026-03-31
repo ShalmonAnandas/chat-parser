@@ -1,9 +1,43 @@
+// ── Parsed types (what the UI consumes) ──────────────────────────────
+
+export type ToolCategory =
+  | 'file-read'
+  | 'file-write'
+  | 'file-search'
+  | 'terminal'
+  | 'search'
+  | 'subagent'
+  | 'other';
+
 export interface ToolCall {
   id?: string;
   name: string;
+  toolId?: string;
+  category: ToolCategory;
   arguments?: Record<string, unknown> | string;
   result?: unknown;
   isError?: boolean;
+  /** Human-readable description (e.g. "Read SKILL.md") */
+  description?: string;
+  /** Past-tense description (e.g. "Read SKILL.md") */
+  pastTenseDescription?: string;
+}
+
+export interface ThinkingBlock {
+  id?: string;
+  content: string;
+}
+
+export interface TextEdit {
+  uri: string;
+  fileName: string;
+  editCount: number;
+  done: boolean;
+}
+
+export interface InlineReference {
+  name: string;
+  path: string;
 }
 
 export interface UsedContext {
@@ -29,6 +63,9 @@ export interface ParsedMessage {
   timeTaken?: number; // ms
   model?: string;
   toolCalls?: ToolCall[];
+  thinkingBlocks?: ThinkingBlock[];
+  textEdits?: TextEdit[];
+  inlineReferences?: InlineReference[];
   usedContext?: UsedContext[];
   planningPhase?: PlanningPhase;
   agentMode?: boolean;
@@ -44,7 +81,7 @@ export interface ParsedSession {
   exportedAt?: number;
 }
 
-// Raw format types for the various GitHub Copilot export schemas
+// ── Raw format types for various GitHub Copilot export schemas ───────
 
 export interface RawToolCallV1 {
   kind?: 'toolCall';
@@ -67,28 +104,68 @@ export interface RawToolCallV2 {
 }
 
 export interface RawResponseValue {
-  kind?: 'markdownContent' | 'toolCall' | 'codeblockUri' | 'inlineReference';
-  value?: string | RawToolCallV1 | RawResponseValue;
+  kind?: string;
+  value?: unknown;
   content?: string;
+  // toolInvocationSerialized fields
+  invocationMessage?: { value?: string };
+  pastTenseMessage?: { value?: string };
+  isComplete?: boolean;
+  isConfirmed?: { type?: number };
+  toolCallId?: string;
+  toolId?: string;
+  source?: { type?: string; label?: string };
+  generatedTitle?: string;
+  isAttachedToThinking?: boolean;
+  // textEditGroup fields
+  uri?: { path?: string; fsPath?: string };
+  edits?: unknown[];
+  done?: boolean;
+  // inlineReference fields
+  name?: string;
+  inlineReference?: { path?: string; fsPath?: string };
+  // thinking fields
+  id?: string;
+  // confirmation fields
+  title?: string;
+  message?: { value?: string };
+  // questionCarousel fields
+  questions?: Array<{
+    id?: string;
+    type?: string;
+    title?: string;
+    message?: string;
+    options?: Array<{ label?: string; value?: string }>;
+    defaultValue?: string;
+  }>;
 }
 
 export interface RawRequestV1 {
+  requestId?: string;
   message?: {
     text?: string;
     timestamp?: string | number;
-    parts?: Array<{ text?: string }>;
+    parts?: Array<{ text?: string; kind?: string }>;
   };
   response?: {
     text?: string;
     timestamp?: string | number;
     value?: RawResponseValue[];
-    agent?: string;
+    agent?: string | { id?: string; name?: string };
     model?: string;
     timeTaken?: number;
     result?: {
       timings?: { firstProgress?: number; totalElapsed?: number };
     };
   };
+  // New format fields
+  timestamp?: string | number;
+  modelId?: string;
+  result?: {
+    timings?: { firstProgress?: number; totalElapsed?: number };
+  };
+  agent?: { id?: string; name?: string };
+  modeInfo?: { kind?: string; modeName?: string };
   usedContext?: Array<{
     document?: { uri?: { path?: string }; fileName?: string };
     ranges?: Array<{ startLine?: number; endLine?: number }>;
@@ -101,6 +178,8 @@ export interface RawSessionV1 {
   title?: string;
   sessionId?: string;
   model?: string;
+  responderUsername?: string;
+  initialLocation?: string;
 }
 
 export interface RawMessageV2 {

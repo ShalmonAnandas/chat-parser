@@ -2,6 +2,10 @@ import {
   ParsedSession,
   ParsedMessage,
   ToolCall,
+  ToolCategory,
+  ThinkingBlock,
+  TextEdit,
+  InlineReference,
   UsedContext,
   RawChatExport,
   RawSessionV1,
@@ -37,6 +41,44 @@ function extractTextContent(content: unknown): string {
   return '';
 }
 
+/** Categorize a tool by its toolId or name */
+function categorizeToolCall(toolId?: string, name?: string): ToolCategory {
+  const id = (toolId ?? name ?? '').toLowerCase();
+  if (id.includes('readfile') || id.includes('read_file') || id === 'copilot_readfile') return 'file-read';
+  if (
+    id.includes('createfile') ||
+    id.includes('replacestring') ||
+    id.includes('multireplacestring') ||
+    id.includes('create_file') ||
+    id === 'copilot_createfile' ||
+    id === 'copilot_replacestring' ||
+    id === 'copilot_multireplacestring'
+  )
+    return 'file-write';
+  if (
+    id.includes('findfiles') ||
+    id.includes('findtextinfiles') ||
+    id.includes('listdirectory') ||
+    id.includes('geterrors') ||
+    id === 'copilot_findfiles' ||
+    id === 'copilot_findtextinfiles' ||
+    id === 'copilot_listdirectory' ||
+    id === 'copilot_geterrors' ||
+    id === 'tool_search'
+  )
+    return 'file-search';
+  if (id.includes('terminal') || id === 'run_in_terminal') return 'terminal';
+  if (id === 'execution_subagent') return 'subagent';
+  return 'other';
+}
+
+/** Extract a clean description from invocationMessage or pastTenseMessage */
+function extractDescription(msg?: { value?: string }): string | undefined {
+  if (!msg?.value) return undefined;
+  // Strip markdown links: [text](url) → text
+  return msg.value.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').trim() || undefined;
+}
+
 function parseToolCallV1(tc: RawToolCallV1): ToolCall {
   let args: Record<string, unknown> | string | undefined;
   if (typeof tc.input === 'string') {
@@ -70,32 +112,104 @@ function parseToolCallV1(tc: RawToolCallV1): ToolCall {
   return {
     id: tc.toolCallId,
     name: tc.name ?? 'unknown',
+    category: categorizeToolCall(undefined, tc.name),
     arguments: args,
     result,
     isError,
   };
 }
 
-function parseResponseValues(values: RawResponseValue[]): { text: string; toolCalls: ToolCall[] } {
-  let text = '';
+/** Parse the new VS Code format where response is an array of kind-tagged items */
+function parseNewFormatResponse(responseItems: RawResponseValue[]): {
+  content: string;
+  toolCalls: ToolCall[];
+  thinkingBlocks: ThinkingBlock[];
+  textEdits: TextEdit[];
+  inlineReferences: InlineReference[];
+} {
+  let content = '';
   const toolCalls: ToolCall[] = [];
+  const thinkingBlocks: ThinkingBlock[] = [];
+  const textEdits: TextEdit[] = [];
+  const inlineReferences: InlineReference[] = [];
 
-  for (const val of values) {
-    if (val.kind === 'markdownContent') {
-      text += typeof val.value === 'string' ? val.value : '';
-    } else if (val.kind === 'toolCall' && val.value && typeof val.value === 'object' && !Array.isArray(val.value)) {
-      const rawTc = val.value as RawToolCallV1;
-      if (rawTc.name) {
-        toolCalls.push(parseToolCallV1(rawTc));
+  for (const item of responseItems) {
+    const kind = item.kind;
+
+    switch (kind) {
+      case 'markdownContent': {
+        content += typeof item.value === 'string' ? item.value : '';
+        break;
       }
-    } else if (typeof val.value === 'string') {
-      text += val.value;
-    } else if (val.content) {
-      text += val.content;
+
+      case 'thinking': {
+        const value = typeof item.value === 'string' ? item.value : '';
+        if (value) {
+          thinkingBlocks.push({ id: item.id, content: value });
+        }
+        break;
+      }
+
+      case 'toolInvocationSerialized': {
+        const tc: ToolCall = {
+          id: item.toolCallId,
+          name: item.toolId ?? 'unknown',
+          toolId: item.toolId,
+          category: categorizeToolCall(item.toolId),
+          description: extractDescription(item.invocationMessage),
+          pastTenseDescription: extractDescription(item.pastTenseMessage),
+          isError: false,
+        };
+        toolCalls.push(tc);
+        break;
+      }
+
+      case 'textEditGroup': {
+        const path = item.uri?.path ?? item.uri?.fsPath ?? 'unknown';
+        const fileName = path.split('/').pop() ?? path;
+        textEdits.push({
+          uri: path,
+          fileName,
+          editCount: Array.isArray(item.edits) ? item.edits.length : 0,
+          done: item.done ?? false,
+        });
+        break;
+      }
+
+      case 'inlineReference': {
+        const refName = item.name ?? '';
+        const refPath = item.inlineReference?.path ?? item.inlineReference?.fsPath ?? '';
+        if (refName || refPath) {
+          inlineReferences.push({ name: refName, path: refPath });
+        }
+        break;
+      }
+
+      case 'toolCall': {
+        if (item.value && typeof item.value === 'object' && !Array.isArray(item.value)) {
+          const rawTc = item.value as RawToolCallV1;
+          if (rawTc.name) {
+            toolCalls.push(parseToolCallV1(rawTc));
+          }
+        }
+        break;
+      }
+
+      // progressTaskSerialized, confirmation, questionCarousel, mcpServersStarting,
+      // codeblockUri, undoStop – we just skip these or could add them later
+      default: {
+        // Try to extract text content from unknown kinds
+        if (typeof item.value === 'string' && kind !== 'mcpServersStarting' && kind !== 'undoStop') {
+          content += item.value;
+        } else if (item.content && typeof item.content === 'string') {
+          content += item.content;
+        }
+        break;
+      }
     }
   }
 
-  return { text, toolCalls };
+  return { content, toolCalls, thinkingBlocks, textEdits, inlineReferences };
 }
 
 function parseV1Format(raw: RawSessionV1): ParsedSession {
@@ -104,7 +218,9 @@ function parseV1Format(raw: RawSessionV1): ParsedSession {
 
   for (let i = 0; i < requests.length; i++) {
     const req = requests[i] as RawRequestV1;
-    const userTs = parseTimestamp(req.message?.timestamp);
+
+    // Timestamps: prefer top-level timestamp (new format), fallback to message.timestamp
+    const userTs = parseTimestamp(req.timestamp) ?? parseTimestamp(req.message?.timestamp);
     const assistantTs = parseTimestamp(req.response?.timestamp);
 
     // User message
@@ -118,18 +234,38 @@ function parseV1Format(raw: RawSessionV1): ParsedSession {
       });
     }
 
-    // Assistant message
+    // Assistant response
     const resp = req.response;
-    if (resp) {
-      let content = '';
-      const toolCalls: ToolCall[] = [];
+    const responseIsArray = Array.isArray(resp);
+    const responseValues = responseIsArray ? (resp as unknown as RawResponseValue[]) : undefined;
+    const responseObj = !responseIsArray && resp ? resp : undefined;
 
-      if (resp.value && Array.isArray(resp.value)) {
-        const parsed = parseResponseValues(resp.value);
-        content = parsed.text;
-        toolCalls.push(...parsed.toolCalls);
-      } else if (resp.text) {
-        content = resp.text;
+    if (responseValues || responseObj) {
+      let content = '';
+      let toolCalls: ToolCall[] = [];
+      let thinkingBlocks: ThinkingBlock[] = [];
+      let textEdits: TextEdit[] = [];
+      let inlineReferences: InlineReference[] = [];
+
+      if (responseValues) {
+        // New format: response is array of kind-tagged items
+        const parsed = parseNewFormatResponse(responseValues);
+        content = parsed.content;
+        toolCalls = parsed.toolCalls;
+        thinkingBlocks = parsed.thinkingBlocks;
+        textEdits = parsed.textEdits;
+        inlineReferences = parsed.inlineReferences;
+      } else if (responseObj) {
+        if (responseObj.value && Array.isArray(responseObj.value)) {
+          const parsed = parseNewFormatResponse(responseObj.value);
+          content = parsed.content;
+          toolCalls = parsed.toolCalls;
+          thinkingBlocks = parsed.thinkingBlocks;
+          textEdits = parsed.textEdits;
+          inlineReferences = parsed.inlineReferences;
+        } else if (responseObj.text) {
+          content = responseObj.text;
+        }
       }
 
       // Parse used context
@@ -141,26 +277,35 @@ function parseV1Format(raw: RawSessionV1): ParsedSession {
           : undefined,
       }));
 
-      // Time taken
+      // Time taken: prefer result.timings (new format), then response fields, then diff
       const timeTaken =
-        resp.timeTaken ??
-        resp.result?.timings?.totalElapsed ??
+        req.result?.timings?.totalElapsed ??
+        responseObj?.timeTaken ??
+        responseObj?.result?.timings?.totalElapsed ??
         (userTs && assistantTs ? assistantTs - userTs : undefined);
+
+      // Model: prefer top-level modelId (new format), then response fields
+      const agentName =
+        typeof req.agent === 'object' ? req.agent?.name : typeof responseObj?.agent === 'string' ? responseObj.agent : undefined;
+      const model = req.modelId ?? responseObj?.model ?? agentName ?? raw.model;
 
       messages.push({
         id: generateId(),
         role: 'assistant',
         content,
-        timestamp: assistantTs,
+        timestamp: userTs ? (timeTaken ? userTs + timeTaken : userTs) : assistantTs,
         timeTaken,
-        model: resp.model ?? resp.agent ?? raw.model,
+        model,
         toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
+        thinkingBlocks: thinkingBlocks.length > 0 ? thinkingBlocks : undefined,
+        textEdits: textEdits.length > 0 ? textEdits : undefined,
+        inlineReferences: inlineReferences.length > 0 ? inlineReferences : undefined,
         usedContext: usedContext.length > 0 ? usedContext : undefined,
       });
     }
   }
 
-  const createdAt = parseTimestamp(raw.creationDate);
+  const createdAt = parseTimestamp(raw.creationDate) ?? parseTimestamp(requests[0]?.timestamp);
 
   return {
     id: raw.sessionId,
@@ -203,6 +348,7 @@ function parseV2Format(raw: RawSessionV2): ParsedSession {
       return {
         id: tc.id,
         name: tc.function?.name ?? 'unknown',
+        category: categorizeToolCall(undefined, tc.function?.name),
         arguments: args,
       };
     });
