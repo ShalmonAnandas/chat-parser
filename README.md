@@ -1,6 +1,6 @@
 # Chat Parser – GitHub Copilot Chat Viewer
 
-A Next.js 14+ application for parsing and displaying GitHub Copilot chat export JSON files.
+A Next.js 16+ application for parsing and displaying GitHub Copilot chat export JSON files.
 
 ## Features
 
