@@ -89,7 +89,7 @@ export default function SavedChatsPage() {
         </div>
 
         {error && (
-          <div className="mb-6 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
+          <div className="tone-surface tone-red mb-6 rounded-2xl p-4 text-sm">
             {error}
           </div>
         )}

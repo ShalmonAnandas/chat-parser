@@ -58,7 +58,7 @@ export default function ShareButton({ session }: ShareButtonProps) {
       <div className="flex items-center gap-2">
         <button
           onClick={handleCopy}
-          className="flex items-center gap-1.5 text-sm bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg hover:bg-emerald-500/25 transition-colors"
+          className="button-success flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm transition-opacity hover:opacity-90"
         >
           {copied ? (
             <>
@@ -85,11 +85,11 @@ export default function ShareButton({ session }: ShareButtonProps) {
       <button
         onClick={handleShare}
         disabled={loading}
-        className="flex items-center gap-1.5 text-sm bg-zinc-800 border border-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg hover:bg-zinc-700 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="button-secondary flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? (
           <>
-            <div className="w-4 h-4 border-2 border-zinc-500 border-t-transparent rounded-full animate-spin" />
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent opacity-60" />
             Sharing…
           </>
         ) : (
@@ -102,7 +102,7 @@ export default function ShareButton({ session }: ShareButtonProps) {
         )}
       </button>
       {error && (
-        <span className="text-xs text-red-400">{error}</span>
+        <span className="tone-text tone-red text-xs">{error}</span>
       )}
     </div>
   );

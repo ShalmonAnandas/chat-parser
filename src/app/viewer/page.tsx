@@ -46,10 +46,10 @@ export default function ViewerPage() {
     return (
       <main className="app-shell flex items-center justify-center px-6">
         <div className="surface-card-strong rounded-3xl px-8 py-10 text-center">
-          <p className="text-red-400 mb-4">{error}</p>
+          <p className="tone-text tone-red mb-4">{error}</p>
           <button
             onClick={() => router.push('/')}
-            className="text-sm text-indigo-400 transition-colors hover:text-indigo-300"
+            className="tone-text tone-indigo text-sm transition-opacity hover:opacity-80"
           >
             ← Go back
           </button>

@@ -62,8 +62,7 @@ function extractArgumentFiles(args: ToolCall['arguments']): Array<{ path: string
 /** Get icon, color, and label based on tool category */
 function getCategoryStyle(category: ToolCategory): {
   icon: React.ReactNode;
-  borderColor: string;
-  bgColor: string;
+  toneClass: string;
   textColor: string;
   label: string;
 } {
@@ -76,9 +75,8 @@ function getCategoryStyle(category: ToolCategory): {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
           </svg>
         ),
-        borderColor: 'border-blue-500/20',
-        bgColor: 'bg-blue-500/5',
-        textColor: 'text-blue-400',
+        toneClass: 'tone-blue',
+        textColor: 'tone-text tone-blue',
         label: 'Read',
       };
     case 'file-write':
@@ -88,9 +86,8 @@ function getCategoryStyle(category: ToolCategory): {
             <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
           </svg>
         ),
-        borderColor: 'border-emerald-500/20',
-        bgColor: 'bg-emerald-500/5',
-        textColor: 'text-emerald-400',
+        toneClass: 'tone-emerald',
+        textColor: 'tone-text tone-emerald',
         label: 'Write',
       };
     case 'file-search':
@@ -100,9 +97,8 @@ function getCategoryStyle(category: ToolCategory): {
             <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
           </svg>
         ),
-        borderColor: 'border-cyan-500/20',
-        bgColor: 'bg-cyan-500/5',
-        textColor: 'text-cyan-400',
+        toneClass: 'tone-cyan',
+        textColor: 'tone-text tone-cyan',
         label: 'Search',
       };
     case 'terminal':
@@ -112,9 +108,8 @@ function getCategoryStyle(category: ToolCategory): {
             <path strokeLinecap="round" strokeLinejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
           </svg>
         ),
-        borderColor: 'border-amber-500/20',
-        bgColor: 'bg-amber-500/5',
-        textColor: 'text-amber-400',
+        toneClass: 'tone-amber',
+        textColor: 'tone-text tone-amber',
         label: 'Terminal',
       };
     case 'subagent':
@@ -124,9 +119,8 @@ function getCategoryStyle(category: ToolCategory): {
             <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" />
           </svg>
         ),
-        borderColor: 'border-violet-500/20',
-        bgColor: 'bg-violet-500/5',
-        textColor: 'text-violet-400',
+        toneClass: 'tone-violet',
+        textColor: 'tone-text tone-violet',
         label: 'Sub-agent',
       };
     case 'search':
@@ -136,9 +130,8 @@ function getCategoryStyle(category: ToolCategory): {
             <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
           </svg>
         ),
-        borderColor: 'border-sky-500/20',
-        bgColor: 'bg-sky-500/5',
-        textColor: 'text-sky-400',
+        toneClass: 'tone-cyan',
+        textColor: 'tone-text tone-cyan',
         label: 'Search',
       };
     default:
@@ -148,9 +141,8 @@ function getCategoryStyle(category: ToolCategory): {
             <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z" />
           </svg>
         ),
-        borderColor: 'border-zinc-700/50',
-        bgColor: 'bg-zinc-800/30',
-        textColor: 'text-zinc-400',
+        toneClass: '',
+        textColor: 'text-secondary',
         label: 'Tool',
       };
   }
@@ -199,7 +191,7 @@ export default function ToolCallBlock({ toolCall }: ToolCallBlockProps) {
   const responseLabel = toolCall.category === 'terminal' ? 'Output' : 'Result';
 
   return (
-    <div className={`overflow-hidden rounded-2xl border ${style.borderColor} ${style.bgColor}`}>
+    <div className={`overflow-hidden rounded-2xl ${style.toneClass ? `tone-surface ${style.toneClass}` : 'surface-subtle'}`}>
       <button
         className={`flex w-full items-start gap-3 px-4 py-3 text-left ${hasDetails ? 'cursor-pointer hover:bg-white/5' : 'cursor-default'} transition-colors`}
         onClick={hasDetails ? () => setExpanded(!expanded) : undefined}
@@ -210,7 +202,7 @@ export default function ToolCallBlock({ toolCall }: ToolCallBlockProps) {
             <span className={`text-[11px] font-semibold uppercase tracking-[0.2em] ${style.textColor}`}>{style.label}</span>
             <span className="truncate text-sm text-primary">{displayName}</span>
             {toolCall.isError && (
-              <span className="rounded-full border border-red-500/20 bg-red-500/15 px-2 py-0.5 text-[11px] text-red-400">
+              <span className="tone-surface tone-red rounded-full px-2 py-0.5 text-[11px]">
                 Error
               </span>
             )}
@@ -221,7 +213,7 @@ export default function ToolCallBlock({ toolCall }: ToolCallBlockProps) {
                 <span
                   key={`${file.path}:${file.fragment ?? ''}`}
                   title={file.path}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-black/10 px-3 py-1 text-xs text-secondary"
+                  className="surface-subtle inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs text-secondary"
                 >
                   <svg className="h-3 w-3 text-soft" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
@@ -244,7 +236,7 @@ export default function ToolCallBlock({ toolCall }: ToolCallBlockProps) {
       </button>
 
       {expanded && hasDetails && (
-        <div className="space-y-3 border-t border-white/5 px-4 pb-4">
+        <div className="space-y-3 border-t px-4 pb-4" style={{ borderColor: 'var(--border-color)' }}>
           {argsStr && (
             <div className="pt-3">
               <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.2em] text-soft">{requestLabel}</p>

@@ -162,17 +162,17 @@ function Stat({
   color: string;
 }) {
   const colorMap: Record<string, string> = {
-    indigo: 'text-indigo-400',
-    blue: 'text-blue-400',
-    amber: 'text-amber-400',
-    purple: 'text-purple-400',
-    emerald: 'text-emerald-400',
-    cyan: 'text-cyan-400',
+    indigo: 'tone-text tone-indigo',
+    blue: 'tone-text tone-blue',
+    amber: 'tone-text tone-amber',
+    purple: 'tone-text tone-purple',
+    emerald: 'tone-text tone-emerald',
+    cyan: 'tone-text tone-cyan',
   };
 
   return (
     <div className="surface-subtle flex items-center gap-2 rounded-2xl px-4 py-3 text-sm">
-      <span className={colorMap[color] ?? 'text-zinc-400'}>{icon}</span>
+      <span className={colorMap[color] ?? 'text-secondary'}>{icon}</span>
       <span className="font-semibold text-primary">{valueStr ?? value}</span>
       <span className="text-secondary">{label}</span>
     </div>

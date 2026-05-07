@@ -74,7 +74,7 @@ const markdownComponents: Components = {
   },
   a({ href, children }) {
     return (
-      <a href={href} className="text-indigo-400 hover:text-indigo-300 hover:underline transition-colors" target="_blank" rel="noopener noreferrer">
+      <a href={href} className="tone-text tone-indigo hover:underline transition-opacity hover:opacity-80" target="_blank" rel="noopener noreferrer">
         {children}
       </a>
     );
@@ -121,8 +121,8 @@ export default function AssistantMessage({ message }: AssistantMessageProps) {
   return (
     <div className="surface-card rounded-[1.9rem] p-6">
       <div className="flex items-start gap-3">
-        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/15">
-          <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <div className="tone-surface tone-emerald flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl">
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
           </svg>
         </div>
@@ -135,7 +135,7 @@ export default function AssistantMessage({ message }: AssistantMessageProps) {
               </span>
             )}
             {duration && (
-              <span className="flex items-center gap-1 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-400">
+              <span className="tone-surface tone-cyan flex items-center gap-1 rounded-full px-3 py-1 text-xs">
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
@@ -143,7 +143,7 @@ export default function AssistantMessage({ message }: AssistantMessageProps) {
               </span>
             )}
             {firstProgress && message.firstProgressMs !== message.timeTaken && (
-              <span className="rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-xs text-violet-300">
+              <span className="tone-surface tone-violet rounded-full px-3 py-1 text-xs">
                 First output {firstProgress}
               </span>
             )}

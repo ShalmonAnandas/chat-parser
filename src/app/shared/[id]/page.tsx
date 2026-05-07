@@ -52,10 +52,10 @@ export default function SharedChatPage() {
     return (
       <main className="app-shell flex items-center justify-center px-6">
         <div className="surface-card-strong rounded-3xl px-8 py-10 text-center">
-          <p className="text-red-400 mb-4">{error}</p>
+          <p className="tone-text tone-red mb-4">{error}</p>
           <button
             onClick={() => router.push('/')}
-            className="text-indigo-400 hover:text-indigo-300 text-sm transition-colors"
+            className="tone-text tone-indigo text-sm transition-opacity hover:opacity-80"
           >
             ← Go to Chat Parser
           </button>
@@ -81,7 +81,7 @@ export default function SharedChatPage() {
           </button>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <span className="rounded-full border border-indigo-500/20 bg-indigo-500/15 px-3 py-1 text-xs text-indigo-400">
+            <span className="tone-surface tone-indigo rounded-full px-3 py-1 text-xs">
               Shared Chat
             </span>
             <span className="text-xs font-medium tracking-wide text-soft">Chat Parser</span>

@@ -67,7 +67,7 @@ export default function HomePage() {
         <div className="mx-auto w-full max-w-2xl">
           <div className="text-center mb-12">
             <div className="mb-6 inline-flex h-[4.5rem] w-[4.5rem] items-center justify-center rounded-[1.75rem] border border-indigo-500/20 bg-gradient-to-br from-indigo-500/20 via-violet-500/20 to-cyan-500/20 shadow-[0_12px_40px_rgba(79,70,229,0.18)]">
-              <svg className="h-9 w-9 text-indigo-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <svg className="h-9 w-9 tone-text tone-indigo" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 0 1 .865-.501 48.172 48.172 0 0 0 3.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z" />
               </svg>
             </div>
@@ -122,7 +122,7 @@ export default function HomePage() {
           </div>
 
           {error && (
-            <div className="mt-5 flex items-center gap-2 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            <div className="tone-surface tone-red mt-5 flex items-center gap-2 rounded-2xl px-4 py-3 text-sm">
               <svg className="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
               </svg>
@@ -139,19 +139,19 @@ export default function HomePage() {
             </div>
             <ol className="space-y-4 text-sm text-secondary">
               <li className="flex gap-3 items-start">
-                <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-xs font-bold text-indigo-400">1</span>
+                <span className="tone-surface tone-indigo mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold">1</span>
                 <span>Open the Copilot Chat panel in VS Code.</span>
               </li>
               <li className="flex gap-3 items-start">
-                <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-xs font-bold text-indigo-400">2</span>
+                <span className="tone-surface tone-indigo mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold">2</span>
                 <span>Open the Command Palette (<kbd className="inline-code rounded-md px-1.5 py-0.5 text-xs font-mono">Ctrl+Shift+P</kbd>).</span>
               </li>
               <li className="flex gap-3 items-start">
-                <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-xs font-bold text-indigo-400">3</span>
+                <span className="tone-surface tone-indigo mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold">3</span>
                 <span>Run <code className="inline-code rounded-md px-1.5 py-0.5 text-xs font-mono">Chat: Export Session…</code>.</span>
               </li>
               <li className="flex gap-3 items-start">
-                <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-xs font-bold text-indigo-400">4</span>
+                <span className="tone-surface tone-indigo mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold">4</span>
                 <span>Save the JSON file, then upload it here to inspect the conversation.</span>
               </li>
             </ol>
