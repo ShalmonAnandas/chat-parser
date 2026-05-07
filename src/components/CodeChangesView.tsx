@@ -81,7 +81,7 @@ export default function CodeChangesView({ messages }: CodeChangesViewProps) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="button-success print:hidden flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm transition-opacity hover:opacity-90"
+        className="button-success flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm transition-opacity hover:opacity-90 print:hidden"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />

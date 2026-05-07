@@ -1,7 +1,5 @@
 'use client';
 
-'use client';
-
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -228,7 +226,7 @@ export default function AssistantMessage({ message }: AssistantMessageProps) {
                             <span
                               key={i}
                               title={ref.path}
-                              className="inline-flex items-center gap-1.5 rounded-full surface-card px-3 py-1.5 text-xs text-secondary"
+                              className="surface-card inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs text-secondary"
                             >
                               <svg className="h-3 w-3 text-soft" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
