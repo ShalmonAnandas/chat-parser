@@ -436,8 +436,7 @@ function parseV1Format(raw: RawSessionV1): ParsedSession {
         req.result?.timings?.totalElapsed,
         responseObj?.timeTaken,
         responseObj?.result?.timings?.totalElapsed,
-        elapsedFromTimestamps,
-        firstProgressMs
+        elapsedFromTimestamps
       );
 
       // Model: prefer top-level modelId (new format), then response fields

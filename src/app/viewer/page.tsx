@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ParsedSession } from '@/types/chat';
 import SessionHeader from '@/components/SessionHeader';
@@ -34,9 +34,9 @@ function readStoredSession(): { session: ParsedSession | null; error: string | n
 
 export default function ViewerPage() {
   const router = useRouter();
-  const initialState = useMemo(() => readStoredSession(), []);
-  const [session] = useState<ParsedSession | null>(initialState.session);
-  const [error] = useState<string | null>(initialState.error);
+  const [initialState] = useState(() => readStoredSession());
+  const session = initialState.session;
+  const error = initialState.error;
 
   useEffect(() => {
     if (!session && !error) {
