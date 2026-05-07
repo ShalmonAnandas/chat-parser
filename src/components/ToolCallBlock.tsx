@@ -20,6 +20,45 @@ function formatResult(result: unknown): string {
   return JSON.stringify(result, null, 2);
 }
 
+function formatFragment(fragment?: string): string | null {
+  if (!fragment) return null;
+  return fragment.replace(/-/g, '–');
+}
+
+function extractArgumentFiles(args: ToolCall['arguments']): Array<{ path: string; fileName: string }> {
+  if (!args) return [];
+
+  const files: string[] = [];
+
+  const pushPath = (value: unknown) => {
+    if (typeof value === 'string' && value.trim()) {
+      files.push(value);
+    }
+  };
+
+  if (typeof args === 'string') {
+    try {
+      return extractArgumentFiles(JSON.parse(args) as ToolCall['arguments']);
+    } catch {
+      return [];
+    }
+  }
+
+  const record = args as Record<string, unknown>;
+  pushPath(record.path);
+  pushPath(record.file);
+  pushPath(record.filePath);
+  pushPath(record.uri);
+
+  if (Array.isArray(record.paths)) record.paths.forEach(pushPath);
+  if (Array.isArray(record.files)) record.files.forEach(pushPath);
+
+  return Array.from(new Set(files)).map((path) => ({
+    path,
+    fileName: path.split('/').pop() ?? path,
+  }));
+}
+
 /** Get icon, color, and label based on tool category */
 function getCategoryStyle(category: ToolCategory): {
   icon: React.ReactNode;
@@ -134,28 +173,61 @@ export default function ToolCallBlock({ toolCall }: ToolCallBlockProps) {
   const argsStr = formatArgs(toolCall.arguments);
   const resultStr = formatResult(toolCall.result);
   const style = getCategoryStyle(toolCall.category);
+  const fileRefs = [
+    ...(toolCall.relatedFiles ?? []),
+    ...extractArgumentFiles(toolCall.arguments).map((file) => ({
+      path: file.path,
+      fileName: file.fileName,
+    })),
+  ].filter(
+    (file, index, all) =>
+      all.findIndex((candidate) => candidate.path === file.path && candidate.fragment === file.fragment) === index
+  );
   const hasDetails = !!(argsStr || resultStr);
 
   // Use pastTenseDescription if available, else the description, else format the name
   const displayName = toolCall.pastTenseDescription ?? toolCall.description ?? formatToolName(toolCall.name);
+  const requestLabel = toolCall.category === 'terminal' ? 'Command' : 'Arguments';
+  const responseLabel = toolCall.category === 'terminal' ? 'Output' : 'Result';
 
   return (
-    <div className={`rounded-lg border ${style.borderColor} ${style.bgColor} overflow-hidden`}>
+    <div className={`overflow-hidden rounded-2xl border ${style.borderColor} ${style.bgColor}`}>
       <button
-        className={`w-full flex items-center gap-2 px-3 py-2 text-left ${hasDetails ? 'hover:bg-white/5 cursor-pointer' : 'cursor-default'} transition-colors`}
+        className={`flex w-full items-start gap-3 px-4 py-3 text-left ${hasDetails ? 'cursor-pointer hover:bg-white/5' : 'cursor-default'} transition-colors`}
         onClick={hasDetails ? () => setExpanded(!expanded) : undefined}
       >
-        <span className={style.textColor}>{style.icon}</span>
-        <span className={`text-xs font-medium ${style.textColor}`}>{style.label}</span>
-        <span className="text-xs text-zinc-400 truncate flex-1">{displayName}</span>
-        {toolCall.isError && (
-          <span className="text-xs bg-red-500/15 text-red-400 border border-red-500/20 px-1.5 py-0.5 rounded">
-            Error
-          </span>
-        )}
+        <span className={`mt-0.5 ${style.textColor}`}>{style.icon}</span>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className={`text-[11px] font-semibold uppercase tracking-[0.2em] ${style.textColor}`}>{style.label}</span>
+            <span className="truncate text-sm text-primary">{displayName}</span>
+            {toolCall.isError && (
+              <span className="rounded-full border border-red-500/20 bg-red-500/15 px-2 py-0.5 text-[11px] text-red-400">
+                Error
+              </span>
+            )}
+          </div>
+          {fileRefs.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {fileRefs.map((file) => (
+                <span
+                  key={`${file.path}:${file.fragment ?? ''}`}
+                  title={file.path}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-black/10 px-3 py-1 text-xs text-secondary"
+                >
+                  <svg className="h-3 w-3 text-soft" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                  </svg>
+                  <span>{file.fileName}</span>
+                  {file.fragment && <span className="text-soft">#{formatFragment(file.fragment)}</span>}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
         {hasDetails && (
           <svg
-            className={`w-3.5 h-3.5 text-zinc-600 transition-transform flex-shrink-0 ${expanded ? 'rotate-180' : ''}`}
+            className={`mt-1 h-3.5 w-3.5 flex-shrink-0 text-soft transition-transform ${expanded ? 'rotate-180' : ''}`}
             fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"
           >
             <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
@@ -164,16 +236,16 @@ export default function ToolCallBlock({ toolCall }: ToolCallBlockProps) {
       </button>
 
       {expanded && hasDetails && (
-        <div className="px-3 pb-3 space-y-2 border-t border-white/5">
+        <div className="space-y-3 border-t border-white/5 px-4 pb-4">
           {argsStr && (
-            <div className="pt-2">
-              <p className="text-[10px] text-zinc-500 mb-1 uppercase tracking-wider font-medium">Arguments</p>
+            <div className="pt-3">
+              <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.2em] text-soft">{requestLabel}</p>
               <CodeBlock code={argsStr} language="json" />
             </div>
           )}
           {resultStr && (
             <div>
-              <p className="text-[10px] text-zinc-500 mb-1 uppercase tracking-wider font-medium">Result</p>
+              <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.2em] text-soft">{responseLabel}</p>
               <CodeBlock
                 code={resultStr}
                 language="text"

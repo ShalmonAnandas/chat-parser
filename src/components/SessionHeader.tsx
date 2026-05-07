@@ -47,19 +47,26 @@ export default function SessionHeader({ session }: SessionHeaderProps) {
   const totalTime = totalResponseTime(session);
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 overflow-hidden">
-      {/* Title section */}
-      <div className="px-6 py-5 border-b border-zinc-800/50">
-        <h1 className="text-lg font-semibold text-white truncate">
-          {session.title ?? 'Copilot Chat Session'}
-        </h1>
-        {session.createdAt && (
-          <p className="text-sm text-zinc-500 mt-1">{formatDate(session.createdAt)}</p>
-        )}
+    <div className="surface-card-strong overflow-hidden rounded-[2rem]">
+      <div className="border-b px-6 py-6" style={{ borderColor: 'var(--border-color)' }}>
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
+            <h1 className="truncate text-2xl font-semibold text-primary">
+              {session.title ?? 'Copilot Chat Session'}
+            </h1>
+            {session.createdAt && (
+              <p className="mt-2 text-sm text-secondary">{formatDate(session.createdAt)}</p>
+            )}
+          </div>
+          {totalTime > 0 && (
+            <p className="max-w-sm text-sm text-soft">
+              Total time includes the model&apos;s visible reply time and any loading/thinking/tool execution timings included in the export.
+            </p>
+          )}
+        </div>
       </div>
 
-      {/* Stats row */}
-      <div className="px-6 py-4 flex flex-wrap gap-4">
+      <div className="grid gap-3 px-6 py-5 md:grid-cols-2 xl:grid-cols-3">
         <Stat
           icon={
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -129,11 +136,11 @@ export default function SessionHeader({ session }: SessionHeaderProps) {
           />
         )}
         {session.model && (
-          <div className="flex items-center gap-1.5 bg-zinc-800/50 border border-zinc-700/50 rounded-lg px-3 py-1.5 text-sm">
-            <svg className="w-3.5 h-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <div className="surface-subtle flex items-center gap-2 rounded-2xl px-4 py-3 text-sm">
+            <svg className="h-3.5 w-3.5 text-soft" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
             </svg>
-            <span className="text-zinc-400 text-xs">{session.model}</span>
+            <span className="text-secondary">{session.model}</span>
           </div>
         )}
       </div>
@@ -164,10 +171,10 @@ function Stat({
   };
 
   return (
-    <div className="flex items-center gap-2 bg-zinc-800/50 border border-zinc-700/50 rounded-lg px-3 py-1.5 text-sm">
+    <div className="surface-subtle flex items-center gap-2 rounded-2xl px-4 py-3 text-sm">
       <span className={colorMap[color] ?? 'text-zinc-400'}>{icon}</span>
-      <span className="font-semibold text-white">{valueStr ?? value}</span>
-      <span className="text-zinc-500">{label}</span>
+      <span className="font-semibold text-primary">{valueStr ?? value}</span>
+      <span className="text-secondary">{label}</span>
     </div>
   );
 }

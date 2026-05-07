@@ -39,7 +39,7 @@ const markdownComponents: Components = {
       return <CodeBlock code={codeStr} language={lang} />;
     }
     return (
-      <code className="bg-zinc-800 text-zinc-200 rounded px-1.5 py-0.5 font-mono text-[0.85em]">
+      <code className="inline-code rounded px-1.5 py-0.5 font-mono text-[0.85em]">
         {children}
       </code>
     );
@@ -54,20 +54,20 @@ const markdownComponents: Components = {
     return <ol className="list-decimal list-inside mb-3 space-y-1">{children}</ol>;
   },
   li({ children }) {
-    return <li className="text-zinc-200">{children}</li>;
+    return <li className="text-primary">{children}</li>;
   },
   h1({ children }) {
-    return <h1 className="text-xl font-bold mb-3 text-white">{children}</h1>;
+    return <h1 className="mb-3 text-xl font-bold text-primary">{children}</h1>;
   },
   h2({ children }) {
-    return <h2 className="text-lg font-bold mb-2 text-white">{children}</h2>;
+    return <h2 className="mb-2 text-lg font-bold text-primary">{children}</h2>;
   },
   h3({ children }) {
-    return <h3 className="text-base font-semibold mb-2 text-white">{children}</h3>;
+    return <h3 className="mb-2 text-base font-semibold text-primary">{children}</h3>;
   },
   blockquote({ children }) {
     return (
-      <blockquote className="border-l-2 border-zinc-700 pl-4 text-zinc-400 mb-3 italic">
+      <blockquote className="mb-3 border-l-2 pl-4 italic text-secondary" style={{ borderColor: 'var(--border-color)' }}>
         {children}
       </blockquote>
     );
@@ -81,25 +81,36 @@ const markdownComponents: Components = {
   },
   table({ children }) {
     return (
-      <div className="overflow-x-auto mb-3 rounded-lg border border-zinc-800">
+      <div className="mb-3 overflow-x-auto rounded-xl border" style={{ borderColor: 'var(--border-color)' }}>
         <table className="w-full border-collapse text-sm">{children}</table>
       </div>
     );
   },
   th({ children }) {
     return (
-      <th className="border-b border-zinc-800 bg-zinc-900 px-3 py-2 text-left font-semibold text-zinc-200">
+      <th
+        className="px-3 py-2 text-left font-semibold text-primary"
+        style={{
+          borderBottom: '1px solid var(--border-color)',
+          backgroundColor: 'var(--surface-3)',
+        }}
+      >
         {children}
       </th>
     );
   },
   td({ children }) {
-    return <td className="border-b border-zinc-800/50 px-3 py-2 text-zinc-300">{children}</td>;
+    return (
+      <td className="px-3 py-2 text-secondary" style={{ borderBottom: '1px solid var(--border-color)' }}>
+        {children}
+      </td>
+    );
   },
 };
 
 export default function AssistantMessage({ message }: AssistantMessageProps) {
   const duration = formatDuration(message.timeTaken);
+  const firstProgress = formatDuration(message.firstProgressMs);
   const hasThinking = message.thinkingBlocks && message.thinkingBlocks.length > 0;
   const hasToolCalls = message.toolCalls && message.toolCalls.length > 0;
   const hasTextEdits = message.textEdits && message.textEdits.length > 0;
@@ -108,79 +119,78 @@ export default function AssistantMessage({ message }: AssistantMessageProps) {
   const hasReferences = message.inlineReferences && message.inlineReferences.length > 0;
 
   return (
-    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5">
+    <div className="surface-card rounded-[1.9rem] p-6">
       <div className="flex items-start gap-3">
-        <div className="flex-shrink-0 w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center">
+        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/15">
           <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
           </svg>
         </div>
         <div className="flex-1 min-w-0">
-          {/* Header row */}
-          <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <span className="text-sm font-medium text-white">Copilot</span>
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium text-primary">Copilot</span>
             {message.model && (
-              <span className="text-xs bg-zinc-800 border border-zinc-700/50 text-zinc-500 px-2 py-0.5 rounded-md">
+              <span className="surface-subtle rounded-full px-3 py-1 text-xs text-secondary">
                 {message.model}
               </span>
             )}
             {duration && (
-              <span className="text-xs bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded-md flex items-center gap-1">
+              <span className="flex items-center gap-1 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 text-xs text-cyan-400">
                 <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                 </svg>
                 {duration}
               </span>
             )}
+            {firstProgress && message.firstProgressMs !== message.timeTaken && (
+              <span className="rounded-full border border-violet-500/20 bg-violet-500/10 px-3 py-1 text-xs text-violet-300">
+                First output {firstProgress}
+              </span>
+            )}
             {message.timestamp && (
-              <span className="text-xs text-zinc-600 ml-auto">{formatTime(message.timestamp)}</span>
+              <span className="ml-auto text-xs text-soft">{formatTime(message.timestamp)}</span>
             )}
           </div>
 
-          {/* Thinking blocks */}
           {hasThinking && (
-            <div className="mb-3">
+            <div className="mb-4">
               <ThinkingBlock blocks={message.thinkingBlocks!} />
             </div>
           )}
 
-          {/* Tool calls */}
           {hasToolCalls && (
-            <div className="mb-3 space-y-2">
+            <div className="mb-4 space-y-3">
               {message.toolCalls!.map((tc, i) => (
                 <ToolCallBlock key={tc.id ?? i} toolCall={tc} />
               ))}
             </div>
           )}
 
-          {/* Text edits */}
           {hasTextEdits && (
-            <div className="mb-3">
+            <div className="mb-4">
               <TextEditBlock edits={message.textEdits!} />
             </div>
           )}
 
-          {/* Markdown content */}
           {hasContent && (
-            <div className="prose prose-invert max-w-none text-zinc-200 text-[15px]">
+            <div className="max-w-none text-[15px] text-primary">
               <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                 {message.content}
               </ReactMarkdown>
             </div>
           )}
 
-          {/* Inline references */}
           {hasReferences && (
-            <div className="mt-3 flex flex-wrap gap-1.5">
+            <div className="mt-4 flex flex-wrap gap-2">
               {message.inlineReferences!.map((ref, i) => {
                 const shortName = ref.name || ref.path.split('/').pop() || 'file';
                 return (
                   <span
                     key={i}
                     title={ref.path}
-                    className="inline-flex items-center gap-1 text-xs bg-zinc-800/50 border border-zinc-700/50 text-zinc-400 rounded-md px-2 py-1"
+                    className="inline-flex items-center gap-1.5 rounded-full surface-subtle px-3 py-1.5 text-xs text-secondary"
                   >
-                    <svg className="w-3 h-3 text-zinc-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                    <svg className="h-3 w-3 text-soft" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
                     </svg>
                     {shortName}
@@ -190,7 +200,6 @@ export default function AssistantMessage({ message }: AssistantMessageProps) {
             </div>
           )}
 
-          {/* Context files */}
           {hasContext && (
             <ContextFiles files={message.usedContext!} />
           )}

@@ -1,13 +1,146 @@
 @import "tailwindcss";
 
+:root {
+  color-scheme: dark;
+  --app-bg: #09090b;
+  --surface-1: rgba(17, 24, 39, 0.62);
+  --surface-2: rgba(12, 18, 30, 0.86);
+  --surface-3: rgba(39, 39, 42, 0.36);
+  --border-color: rgba(161, 161, 170, 0.16);
+  --border-strong: rgba(99, 102, 241, 0.2);
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-soft: #71717a;
+  --inline-code-bg: rgba(39, 39, 42, 0.8);
+  --code-bg: #0c0c0f;
+  --shadow-soft: 0 16px 40px rgba(0, 0, 0, 0.22);
+  --shadow-elevated: 0 26px 80px rgba(0, 0, 0, 0.32);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --app-bg: #f3f7fb;
+  --surface-1: rgba(255, 255, 255, 0.84);
+  --surface-2: rgba(255, 255, 255, 0.96);
+  --surface-3: rgba(226, 232, 240, 0.65);
+  --border-color: rgba(15, 23, 42, 0.1);
+  --border-strong: rgba(79, 70, 229, 0.18);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-soft: #64748b;
+  --inline-code-bg: rgba(226, 232, 240, 0.9);
+  --code-bg: #f8fafc;
+  --shadow-soft: 0 12px 32px rgba(15, 23, 42, 0.08);
+  --shadow-elevated: 0 24px 70px rgba(15, 23, 42, 0.12);
+}
+
 html,
 body {
-  background-color: #0a0a0a;
-  color: #e4e4e7;
+  min-height: 100%;
+  background-color: var(--app-bg);
+  color: var(--text-primary);
 }
 
 * {
   box-sizing: border-box;
+}
+
+body {
+  background-image:
+    radial-gradient(circle at top left, rgba(99, 102, 241, 0.18), transparent 28%),
+    radial-gradient(circle at top right, rgba(14, 165, 233, 0.14), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 45%);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+button,
+input,
+textarea,
+select {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.page-container {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.app-topbar {
+  background: rgba(9, 9, 11, 0.72);
+  border-bottom: 1px solid var(--border-color);
+  backdrop-filter: blur(18px);
+}
+
+:root[data-theme='light'] .app-topbar {
+  background: rgba(243, 247, 251, 0.88);
+}
+
+.surface-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(18px);
+}
+
+.surface-card-strong {
+  background: var(--surface-2);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-elevated);
+  backdrop-filter: blur(20px);
+}
+
+.surface-subtle {
+  background: var(--surface-3);
+  border: 1px solid var(--border-color);
+}
+
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-soft {
+  color: var(--text-soft);
+}
+
+.inline-code {
+  background: var(--inline-code-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.code-surface {
+  background: var(--code-bg);
+}
+
+.hero-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.hero-orb-indigo {
+  background: rgba(99, 102, 241, 0.3);
+}
+
+.hero-orb-cyan {
+  background: rgba(14, 165, 233, 0.2);
 }
 
 ::-webkit-scrollbar {

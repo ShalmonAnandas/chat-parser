@@ -14,9 +14,9 @@ export default function ThinkingBlock({ blocks }: ThinkingBlockProps) {
   const preview = (blocks[0]?.content.slice(0, 150).replace(/\s+\S*$/, '').trim()) ?? '';
 
   return (
-    <div className="rounded-xl border border-purple-500/20 bg-purple-500/5 overflow-hidden">
+    <div className="overflow-hidden rounded-2xl border border-purple-500/20 bg-purple-500/10">
       <button
-        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-purple-500/10 transition-colors"
+        className="flex w-full items-center gap-2 px-4 py-3 text-left transition-colors hover:bg-purple-500/10"
         onClick={() => setExpanded(!expanded)}
       >
         <svg className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -37,15 +37,15 @@ export default function ThinkingBlock({ blocks }: ThinkingBlockProps) {
       </button>
 
       {!expanded && preview && (
-        <div className="px-3 pb-2">
+        <div className="px-4 pb-3">
           <p className="text-xs text-purple-300/50 italic truncate">{preview}…</p>
         </div>
       )}
 
       {expanded && (
-        <div className="px-3 pb-3 space-y-2 max-h-96 overflow-y-auto">
+        <div className="max-h-96 space-y-3 overflow-y-auto px-4 pb-4">
           {blocks.map((block, i) => (
-            <div key={block.id ?? i} className="text-xs text-purple-200/70 whitespace-pre-wrap leading-relaxed font-mono">
+            <div key={block.id ?? i} className="whitespace-pre-wrap rounded-xl bg-purple-950/10 px-3 py-2 font-mono text-xs leading-relaxed text-purple-200/80">
               {block.content}
             </div>
           ))}

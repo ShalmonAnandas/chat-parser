@@ -3,8 +3,10 @@ import {
   ParsedMessage,
   ToolCall,
   ToolCategory,
+  ToolFileRef,
   ThinkingBlock,
   TextEdit,
+  TextEditPatch,
   InlineReference,
   UsedContext,
   RawChatExport,
@@ -12,6 +14,7 @@ import {
   RawSessionV2,
   RawRequestV1,
   RawMessageV2,
+  RawMessageMarkup,
   RawResponseValue,
   RawToolCallV1,
 } from '@/types/chat';
@@ -70,6 +73,105 @@ function extractTextContent(content: unknown): string {
       .join('');
   }
   return '';
+}
+
+function getUriPath(uri?: { path?: string; fsPath?: string }): string | undefined {
+  return uri?.path ?? uri?.fsPath;
+}
+
+function uniqueFiles(files: ToolFileRef[]): ToolFileRef[] {
+  const seen = new Set<string>();
+  return files.filter((file) => {
+    const key = `${file.path}#${file.fragment ?? ''}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function extractFilesFromMarkup(message?: RawMessageMarkup): ToolFileRef[] {
+  if (!message?.uris) return [];
+
+  return uniqueFiles(
+    Object.values(message.uris)
+      .map((uri) => {
+        const path = uri.path ?? uri.fsPath;
+        if (!path) return undefined;
+
+        return {
+          path,
+          fileName: path.split('/').pop() ?? path,
+          fragment: uri.fragment,
+        };
+      })
+      .filter((file): file is ToolFileRef => !!file)
+  );
+}
+
+function extractToolSpecificDetails(toolSpecificData?: Record<string, unknown>): Pick<ToolCall, 'arguments' | 'result'> {
+  if (!toolSpecificData) return {};
+
+  const kind = typeof toolSpecificData.kind === 'string' ? toolSpecificData.kind : undefined;
+
+  if (kind === 'terminal') {
+    const commandLine = toolSpecificData.commandLine as { forDisplay?: string; original?: string } | undefined;
+    const terminalOutput = toolSpecificData.terminalCommandOutput as { text?: string } | undefined;
+    const terminalState = toolSpecificData.terminalCommandState as { exitCode?: number; duration?: number } | undefined;
+
+    return {
+      arguments: commandLine?.forDisplay ?? commandLine?.original,
+      result:
+        terminalOutput?.text ??
+        (terminalState
+          ? {
+              exitCode: terminalState.exitCode,
+              duration: terminalState.duration,
+            }
+          : toolSpecificData),
+    };
+  }
+
+  if (kind === 'todoList') {
+    return { result: toolSpecificData.todoList };
+  }
+
+  return { result: toolSpecificData };
+}
+
+function extractTextEditPatches(edits: unknown): TextEditPatch[] {
+  const patches: TextEditPatch[] = [];
+
+  const visit = (value: unknown) => {
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+
+    if (!value || typeof value !== 'object') return;
+
+    const entry = value as {
+      text?: unknown;
+      range?: {
+        startLineNumber?: number;
+        endLineNumber?: number;
+        startColumn?: number;
+        endColumn?: number;
+      };
+    };
+
+    if (!entry.range) return;
+
+    patches.push({
+      text: typeof entry.text === 'string' ? entry.text : '',
+      startLine: entry.range.startLineNumber ?? 0,
+      endLine: entry.range.endLineNumber ?? 0,
+      startColumn: entry.range.startColumn ?? 0,
+      endColumn: entry.range.endColumn ?? 0,
+    });
+  };
+
+  visit(edits);
+  return patches;
 }
 
 /** Categorize a tool by its toolId or name */
@@ -182,6 +284,12 @@ function parseNewFormatResponse(responseItems: RawResponseValue[]): {
       }
 
       case 'toolInvocationSerialized': {
+        const relatedFiles = uniqueFiles([
+          ...extractFilesFromMarkup(item.invocationMessage),
+          ...extractFilesFromMarkup(item.pastTenseMessage),
+        ]);
+        const details = extractToolSpecificDetails(item.toolSpecificData);
+
         const tc: ToolCall = {
           id: item.toolCallId,
           name: item.toolId ?? 'unknown',
@@ -189,6 +297,9 @@ function parseNewFormatResponse(responseItems: RawResponseValue[]): {
           category: categorizeToolCall(item.toolId),
           description: extractDescription(item.invocationMessage),
           pastTenseDescription: extractDescription(item.pastTenseMessage),
+          relatedFiles: relatedFiles.length > 0 ? relatedFiles : undefined,
+          arguments: details.arguments,
+          result: details.result,
           isError: false,
         };
         toolCalls.push(tc);
@@ -196,13 +307,14 @@ function parseNewFormatResponse(responseItems: RawResponseValue[]): {
       }
 
       case 'textEditGroup': {
-        const path = item.uri?.path ?? item.uri?.fsPath ?? 'unknown';
+        const path = getUriPath(item.uri) ?? 'unknown';
         const fileName = path.split('/').pop() ?? path;
         textEdits.push({
           uri: path,
           fileName,
           editCount: Array.isArray(item.edits) ? item.edits.length : 0,
           done: item.done ?? false,
+          patches: extractTextEditPatches(item.edits),
         });
         break;
       }
@@ -314,13 +426,18 @@ function parseV1Format(raw: RawSessionV1): ParsedSession {
         findLatestNestedTimestamp(req.result)
       );
       const elapsedFromTimestamps = durationBetween(userTs, latestResponseTs);
+      const firstProgressMs = maxDefined(
+        req.result?.timings?.firstProgress,
+        responseObj?.result?.timings?.firstProgress
+      );
 
       // Time taken: use the longest available duration so tool work is included when present.
       const timeTaken = maxDefined(
         req.result?.timings?.totalElapsed,
         responseObj?.timeTaken,
         responseObj?.result?.timings?.totalElapsed,
-        elapsedFromTimestamps
+        elapsedFromTimestamps,
+        firstProgressMs
       );
 
       // Model: prefer top-level modelId (new format), then response fields
@@ -334,6 +451,7 @@ function parseV1Format(raw: RawSessionV1): ParsedSession {
         content,
         timestamp: latestResponseTs ?? (userTs && timeTaken ? userTs + timeTaken : undefined),
         timeTaken,
+        firstProgressMs,
         model,
         toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
         thinkingBlocks: thinkingBlocks.length > 0 ? thinkingBlocks : undefined,
