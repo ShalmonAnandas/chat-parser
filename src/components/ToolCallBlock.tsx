@@ -173,16 +173,24 @@ export default function ToolCallBlock({ toolCall }: ToolCallBlockProps) {
   const argsStr = formatArgs(toolCall.arguments);
   const resultStr = formatResult(toolCall.result);
   const style = getCategoryStyle(toolCall.category);
-  const fileRefs = [
-    ...(toolCall.relatedFiles ?? []),
+  const fileRefMap = new Map<string, { path: string; fileName: string; fragment?: string }>();
+  const relatedFiles: Array<{ path: string; fileName: string; fragment?: string }> = [
+    ...(toolCall.relatedFiles ?? []).map((file) => ({
+      path: file.path,
+      fileName: file.fileName,
+      fragment: file.fragment,
+    })),
     ...extractArgumentFiles(toolCall.arguments).map((file) => ({
       path: file.path,
       fileName: file.fileName,
     })),
-  ].filter(
-    (file, index, all) =>
-      all.findIndex((candidate) => candidate.path === file.path && candidate.fragment === file.fragment) === index
-  );
+  ];
+
+  relatedFiles.forEach((file) => {
+    fileRefMap.set(`${file.path}:${file.fragment ?? ''}`, file);
+  });
+
+  const fileRefs = Array.from(fileRefMap.values());
   const hasDetails = !!(argsStr || resultStr);
 
   // Use pastTenseDescription if available, else the description, else format the name

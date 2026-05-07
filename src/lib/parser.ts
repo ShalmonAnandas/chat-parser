@@ -92,20 +92,20 @@ function uniqueFiles(files: ToolFileRef[]): ToolFileRef[] {
 function extractFilesFromMarkup(message?: RawMessageMarkup): ToolFileRef[] {
   if (!message?.uris) return [];
 
-  return uniqueFiles(
-    Object.values(message.uris)
-      .map((uri) => {
-        const path = uri.path ?? uri.fsPath;
-        if (!path) return undefined;
+  const files = Object.values(message.uris)
+    .map<ToolFileRef | undefined>((uri) => {
+      const path = uri.path ?? uri.fsPath;
+      if (!path) return undefined;
 
-        return {
-          path,
-          fileName: path.split('/').pop() ?? path,
-          fragment: uri.fragment,
-        };
-      })
-      .filter((file): file is ToolFileRef => !!file)
-  );
+      return {
+        path,
+        fileName: path.split('/').pop() ?? path,
+        fragment: uri.fragment,
+      };
+    })
+    .filter((file): file is ToolFileRef => !!file);
+
+  return uniqueFiles(files);
 }
 
 function extractToolSpecificDetails(toolSpecificData?: Record<string, unknown>): Pick<ToolCall, 'arguments' | 'result'> {

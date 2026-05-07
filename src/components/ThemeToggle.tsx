@@ -17,12 +17,11 @@ function resolveTheme(): Theme {
 
 export default function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
-  const [theme, setTheme] = useState<Theme>('dark');
+  const [theme, setTheme] = useState<Theme>(() => resolveTheme());
 
   useEffect(() => {
-    const initialTheme = resolveTheme();
-    setTheme(initialTheme);
-    setMounted(true);
+    const frame = window.requestAnimationFrame(() => setMounted(true));
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   useEffect(() => {
