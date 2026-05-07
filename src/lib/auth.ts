@@ -12,12 +12,17 @@ function normalizeUrl(value?: string) {
     return undefined;
   }
 
-  const withProtocol =
-    trimmed.startsWith('http://') || trimmed.startsWith('https://')
-      ? trimmed
-      : `https://${trimmed}`;
+  return trimmed.replace(/\/$/, '');
+}
 
-  return withProtocol.replace(/\/$/, '');
+function normalizeHost(value?: string) {
+  const normalizedValue = normalizeUrl(value);
+
+  if (!normalizedValue) {
+    return undefined;
+  }
+
+  return `https://${normalizedValue}`;
 }
 
 const githubClientId =
@@ -25,11 +30,11 @@ const githubClientId =
 const githubClientSecret =
   process.env.GITHUB_CLIENT_SECRET ?? process.env.AUTH_GITHUB_SECRET;
 
-const authUrl = normalizeUrl(
-  process.env.AUTH_URL ??
-    process.env.NEXTAUTH_URL ??
-    process.env.VERCEL_PROJECT_PRODUCTION_URL
-);
+// Prefer the explicit Auth.js URL, fall back to NextAuth's legacy alias, and
+// only use Vercel's production hostname as a last resort for preview deploys.
+const authUrl =
+  normalizeUrl(process.env.AUTH_URL ?? process.env.NEXTAUTH_URL) ??
+  normalizeHost(process.env.VERCEL_PROJECT_PRODUCTION_URL);
 
 const redirectProxyUrl =
   normalizeUrl(process.env.AUTH_REDIRECT_PROXY_URL) ??
