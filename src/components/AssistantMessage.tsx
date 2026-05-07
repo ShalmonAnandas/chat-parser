@@ -1,5 +1,8 @@
 'use client';
 
+'use client';
+
+import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Components } from 'react-markdown';
@@ -26,6 +29,10 @@ function formatDuration(ms?: number): string {
   const mins = Math.floor(ms / 60000);
   const secs = Math.round((ms % 60000) / 1000);
   return `${mins}m ${secs}s`;
+}
+
+function formatCount(count: number, singular: string, plural = `${singular}s`): string {
+  return `${count} ${count === 1 ? singular : plural}`;
 }
 
 const markdownComponents: Components = {
@@ -109,6 +116,7 @@ const markdownComponents: Components = {
 };
 
 export default function AssistantMessage({ message }: AssistantMessageProps) {
+  const [showProcess, setShowProcess] = useState(false);
   const duration = formatDuration(message.timeTaken);
   const firstProgress = formatDuration(message.firstProgressMs);
   const hasThinking = message.thinkingBlocks && message.thinkingBlocks.length > 0;
@@ -117,6 +125,14 @@ export default function AssistantMessage({ message }: AssistantMessageProps) {
   const hasContent = !!message.content;
   const hasContext = message.usedContext && message.usedContext.length > 0;
   const hasReferences = message.inlineReferences && message.inlineReferences.length > 0;
+  const hasProcess = hasThinking || hasToolCalls || hasTextEdits || hasReferences || hasContext;
+  const processSummary = [
+    hasThinking ? formatCount(message.thinkingBlocks!.length, 'thinking block') : null,
+    hasToolCalls ? formatCount(message.toolCalls!.length, 'tool call') : null,
+    hasTextEdits ? formatCount(message.textEdits!.length, 'edit') : null,
+    hasReferences ? formatCount(message.inlineReferences!.length, 'reference') : null,
+    hasContext ? formatCount(message.usedContext!.length, 'context file') : null,
+  ].filter(Boolean).join(' · ');
 
   return (
     <div className="surface-card rounded-[1.9rem] p-6">
@@ -152,26 +168,6 @@ export default function AssistantMessage({ message }: AssistantMessageProps) {
             )}
           </div>
 
-          {hasThinking && (
-            <div className="mb-4">
-              <ThinkingBlock blocks={message.thinkingBlocks!} />
-            </div>
-          )}
-
-          {hasToolCalls && (
-            <div className="mb-4 space-y-3">
-              {message.toolCalls!.map((tc, i) => (
-                <ToolCallBlock key={tc.id ?? i} toolCall={tc} />
-              ))}
-            </div>
-          )}
-
-          {hasTextEdits && (
-            <div className="mb-4">
-              <TextEditBlock edits={message.textEdits!} />
-            </div>
-          )}
-
           {hasContent && (
             <div className="max-w-none text-[15px] text-primary">
               <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
@@ -180,28 +176,75 @@ export default function AssistantMessage({ message }: AssistantMessageProps) {
             </div>
           )}
 
-          {hasReferences && (
-            <div className="mt-4 flex flex-wrap gap-2">
-              {message.inlineReferences!.map((ref, i) => {
-                const shortName = ref.name || ref.path.split('/').pop() || 'file';
-                return (
-                  <span
-                    key={i}
-                    title={ref.path}
-                    className="inline-flex items-center gap-1.5 rounded-full surface-subtle px-3 py-1.5 text-xs text-secondary"
-                  >
-                    <svg className="h-3 w-3 text-soft" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+          {hasProcess && (
+            <div className={`${hasContent ? 'mt-4' : ''}`}>
+              <div className="overflow-hidden rounded-2xl surface-subtle">
+                <button
+                  type="button"
+                  onClick={() => setShowProcess((current) => !current)}
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:text-primary"
+                >
+                  <div className="tone-surface tone-violet flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl">
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 0 0-2.455 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
                     </svg>
-                    {shortName}
-                  </span>
-                );
-              })}
-            </div>
-          )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-primary">
+                      {showProcess ? 'Hide process details' : 'Show process details'}
+                    </p>
+                    <p className="truncate text-xs text-secondary">{processSummary}</p>
+                  </div>
+                  <svg
+                    className={`h-4 w-4 flex-shrink-0 text-soft transition-transform ${showProcess ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                  </svg>
+                </button>
 
-          {hasContext && (
-            <ContextFiles files={message.usedContext!} />
+                {showProcess && (
+                  <div className="space-y-4 border-t px-4 pb-4 pt-4" style={{ borderColor: 'var(--border-color)' }}>
+                    {hasThinking && <ThinkingBlock blocks={message.thinkingBlocks!} />}
+
+                    {hasToolCalls && (
+                      <div className="space-y-3">
+                        {message.toolCalls!.map((tc, i) => (
+                          <ToolCallBlock key={tc.id ?? i} toolCall={tc} />
+                        ))}
+                      </div>
+                    )}
+
+                    {hasTextEdits && <TextEditBlock edits={message.textEdits!} />}
+
+                    {hasReferences && (
+                      <div className="flex flex-wrap gap-2">
+                        {message.inlineReferences!.map((ref, i) => {
+                          const shortName = ref.name || ref.path.split('/').pop() || 'file';
+                          return (
+                            <span
+                              key={i}
+                              title={ref.path}
+                              className="inline-flex items-center gap-1.5 rounded-full surface-card px-3 py-1.5 text-xs text-secondary"
+                            >
+                              <svg className="h-3 w-3 text-soft" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                              </svg>
+                              {shortName}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {hasContext && <ContextFiles files={message.usedContext!} />}
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
       </div>
