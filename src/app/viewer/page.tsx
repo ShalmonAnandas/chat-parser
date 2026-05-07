@@ -34,9 +34,7 @@ function readStoredSession(): { session: ParsedSession | null; error: string | n
 
 export default function ViewerPage() {
   const router = useRouter();
-  const [initialState] = useState(() => readStoredSession());
-  const session = initialState.session;
-  const error = initialState.error;
+  const [{ session, error }] = useState(() => readStoredSession());
 
   useEffect(() => {
     if (!session && !error) {

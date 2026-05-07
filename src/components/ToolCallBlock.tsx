@@ -22,7 +22,7 @@ function formatResult(result: unknown): string {
 
 function formatFragment(fragment?: string): string | null {
   if (!fragment) return null;
-  return fragment.replace(/-/g, '–');
+  return /^\d+-\d+$/.test(fragment) ? fragment.replace('-', '–') : fragment;
 }
 
 function extractArgumentFiles(args: ToolCall['arguments']): Array<{ path: string; fileName: string }> {
