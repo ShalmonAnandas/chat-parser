@@ -35,6 +35,16 @@ const redirectProxyUrl =
   normalizeUrl(process.env.AUTH_REDIRECT_PROXY_URL) ??
   (authUrl ? `${authUrl}/api/auth` : undefined);
 
+const providers =
+  githubClientId && githubClientSecret
+    ? [
+        GitHub({
+          clientId: githubClientId,
+          clientSecret: githubClientSecret,
+        }),
+      ]
+    : [];
+
 if (!githubClientId || !githubClientSecret) {
   console.warn(
     'Missing GitHub OAuth credentials. Set GITHUB_CLIENT_ID/GITHUB_CLIENT_SECRET or AUTH_GITHUB_ID/AUTH_GITHUB_SECRET.'
@@ -43,12 +53,7 @@ if (!githubClientId || !githubClientSecret) {
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   redirectProxyUrl,
-  providers: [
-    GitHub({
-      clientId: githubClientId,
-      clientSecret: githubClientSecret,
-    }),
-  ],
+  providers,
   callbacks: {
     session({ session, token }) {
       if (session.user && token.sub) {
