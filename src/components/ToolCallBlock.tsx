@@ -63,7 +63,7 @@ function extractArgumentFiles(args: ToolCall['arguments']): Array<{ path: string
 function getCategoryStyle(category: ToolCategory): {
   icon: React.ReactNode;
   toneClass: string;
-  textColor: string;
+  textClasses: string;
   label: string;
 } {
   switch (category) {
@@ -76,7 +76,7 @@ function getCategoryStyle(category: ToolCategory): {
           </svg>
         ),
         toneClass: 'tone-blue',
-        textColor: 'tone-text tone-blue',
+        textClasses: 'tone-text tone-blue',
         label: 'Read',
       };
     case 'file-write':
@@ -87,7 +87,7 @@ function getCategoryStyle(category: ToolCategory): {
           </svg>
         ),
         toneClass: 'tone-emerald',
-        textColor: 'tone-text tone-emerald',
+        textClasses: 'tone-text tone-emerald',
         label: 'Write',
       };
     case 'file-search':
@@ -98,7 +98,7 @@ function getCategoryStyle(category: ToolCategory): {
           </svg>
         ),
         toneClass: 'tone-cyan',
-        textColor: 'tone-text tone-cyan',
+        textClasses: 'tone-text tone-cyan',
         label: 'Search',
       };
     case 'terminal':
@@ -109,7 +109,7 @@ function getCategoryStyle(category: ToolCategory): {
           </svg>
         ),
         toneClass: 'tone-amber',
-        textColor: 'tone-text tone-amber',
+        textClasses: 'tone-text tone-amber',
         label: 'Terminal',
       };
     case 'subagent':
@@ -120,7 +120,7 @@ function getCategoryStyle(category: ToolCategory): {
           </svg>
         ),
         toneClass: 'tone-violet',
-        textColor: 'tone-text tone-violet',
+        textClasses: 'tone-text tone-violet',
         label: 'Sub-agent',
       };
     case 'search':
@@ -131,7 +131,7 @@ function getCategoryStyle(category: ToolCategory): {
           </svg>
         ),
         toneClass: 'tone-cyan',
-        textColor: 'tone-text tone-cyan',
+        textClasses: 'tone-text tone-cyan',
         label: 'Search',
       };
     default:
@@ -142,7 +142,7 @@ function getCategoryStyle(category: ToolCategory): {
           </svg>
         ),
         toneClass: '',
-        textColor: 'text-secondary',
+        textClasses: 'text-secondary',
         label: 'Tool',
       };
   }
@@ -196,10 +196,10 @@ export default function ToolCallBlock({ toolCall }: ToolCallBlockProps) {
         className={`flex w-full items-start gap-3 px-4 py-3 text-left ${hasDetails ? 'cursor-pointer hover:bg-white/5' : 'cursor-default'} transition-colors`}
         onClick={hasDetails ? () => setExpanded(!expanded) : undefined}
       >
-        <span className={`mt-0.5 ${style.textColor}`}>{style.icon}</span>
+        <span className={`mt-0.5 ${style.textClasses}`}>{style.icon}</span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className={`text-[11px] font-semibold uppercase tracking-[0.2em] ${style.textColor}`}>{style.label}</span>
+            <span className={`text-[11px] font-semibold uppercase tracking-[0.2em] ${style.textClasses}`}>{style.label}</span>
             <span className="truncate text-sm text-primary">{displayName}</span>
             {toolCall.isError && (
               <span className="tone-surface tone-red rounded-full px-2 py-0.5 text-[11px]">
