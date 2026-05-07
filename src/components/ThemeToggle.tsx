@@ -32,7 +32,7 @@ export default function ThemeToggle() {
   }, [mounted, theme]);
 
   if (!mounted) {
-    return <div className="h-10 w-10 rounded-xl surface-subtle" aria-hidden="true" />;
+    return <div className="h-10 w-10 rounded-xl surface-subtle" role="presentation" />;
   }
 
   const isLight = theme === 'light';
