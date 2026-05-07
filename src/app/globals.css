@@ -2,36 +2,92 @@
 
 :root {
   color-scheme: dark;
-  --app-bg: #09090b;
-  --surface-1: rgba(17, 24, 39, 0.62);
-  --surface-2: rgba(12, 18, 30, 0.86);
-  --surface-3: rgba(39, 39, 42, 0.36);
-  --border-color: rgba(161, 161, 170, 0.16);
-  --border-strong: rgba(99, 102, 241, 0.2);
-  --text-primary: #f4f4f5;
-  --text-secondary: #a1a1aa;
-  --text-soft: #71717a;
-  --inline-code-bg: rgba(39, 39, 42, 0.8);
-  --code-bg: #0c0c0f;
+  --app-bg: #080b12;
+  --surface-1: rgba(15, 23, 42, 0.72);
+  --surface-2: rgba(15, 23, 42, 0.9);
+  --surface-3: rgba(51, 65, 85, 0.38);
+  --border-color: rgba(148, 163, 184, 0.2);
+  --border-strong: rgba(129, 140, 248, 0.28);
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-soft: #94a3b8;
+  --inline-code-bg: rgba(30, 41, 59, 0.88);
+  --code-bg: #0f172a;
   --shadow-soft: 0 16px 40px rgba(0, 0, 0, 0.22);
   --shadow-elevated: 0 26px 80px rgba(0, 0, 0, 0.32);
+  --button-neutral-bg: rgba(30, 41, 59, 0.88);
+  --button-neutral-bg-hover: rgba(51, 65, 85, 0.95);
+  --button-neutral-border: rgba(148, 163, 184, 0.34);
+  --button-neutral-text: #e2e8f0;
+  --indigo-surface: rgba(79, 70, 229, 0.18);
+  --indigo-border: rgba(129, 140, 248, 0.28);
+  --indigo-text: #c7d2fe;
+  --blue-surface: rgba(37, 99, 235, 0.18);
+  --blue-border: rgba(96, 165, 250, 0.28);
+  --blue-text: #bfdbfe;
+  --emerald-surface: rgba(16, 185, 129, 0.18);
+  --emerald-border: rgba(52, 211, 153, 0.3);
+  --emerald-text: #a7f3d0;
+  --purple-surface: rgba(147, 51, 234, 0.18);
+  --purple-border: rgba(192, 132, 252, 0.3);
+  --purple-text: #e9d5ff;
+  --cyan-surface: rgba(6, 182, 212, 0.18);
+  --cyan-border: rgba(103, 232, 249, 0.28);
+  --cyan-text: #a5f3fc;
+  --violet-surface: rgba(139, 92, 246, 0.18);
+  --violet-border: rgba(167, 139, 250, 0.28);
+  --violet-text: #ddd6fe;
+  --amber-surface: rgba(245, 158, 11, 0.18);
+  --amber-border: rgba(251, 191, 36, 0.28);
+  --amber-text: #fde68a;
+  --red-surface: rgba(239, 68, 68, 0.18);
+  --red-border: rgba(248, 113, 113, 0.3);
+  --red-text: #fca5a5;
 }
 
 :root[data-theme='light'] {
   color-scheme: light;
   --app-bg: #f3f7fb;
-  --surface-1: rgba(255, 255, 255, 0.84);
-  --surface-2: rgba(255, 255, 255, 0.96);
-  --surface-3: rgba(226, 232, 240, 0.65);
-  --border-color: rgba(15, 23, 42, 0.1);
-  --border-strong: rgba(79, 70, 229, 0.18);
+  --surface-1: rgba(255, 255, 255, 0.94);
+  --surface-2: rgba(255, 255, 255, 0.98);
+  --surface-3: rgba(226, 232, 240, 0.82);
+  --border-color: rgba(71, 85, 105, 0.16);
+  --border-strong: rgba(79, 70, 229, 0.24);
   --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-soft: #64748b;
+  --text-secondary: #334155;
+  --text-soft: #475569;
   --inline-code-bg: rgba(226, 232, 240, 0.9);
   --code-bg: #f8fafc;
   --shadow-soft: 0 12px 32px rgba(15, 23, 42, 0.08);
   --shadow-elevated: 0 24px 70px rgba(15, 23, 42, 0.12);
+  --button-neutral-bg: rgba(255, 255, 255, 0.96);
+  --button-neutral-bg-hover: rgba(241, 245, 249, 0.98);
+  --button-neutral-border: rgba(148, 163, 184, 0.46);
+  --button-neutral-text: #1e293b;
+  --indigo-surface: rgba(224, 231, 255, 0.92);
+  --indigo-border: rgba(99, 102, 241, 0.26);
+  --indigo-text: #4338ca;
+  --blue-surface: rgba(219, 234, 254, 0.92);
+  --blue-border: rgba(59, 130, 246, 0.26);
+  --blue-text: #1d4ed8;
+  --emerald-surface: rgba(209, 250, 229, 0.94);
+  --emerald-border: rgba(16, 185, 129, 0.28);
+  --emerald-text: #047857;
+  --purple-surface: rgba(243, 232, 255, 0.94);
+  --purple-border: rgba(168, 85, 247, 0.28);
+  --purple-text: #7e22ce;
+  --cyan-surface: rgba(207, 250, 254, 0.94);
+  --cyan-border: rgba(6, 182, 212, 0.28);
+  --cyan-text: #0f766e;
+  --violet-surface: rgba(237, 233, 254, 0.94);
+  --violet-border: rgba(139, 92, 246, 0.28);
+  --violet-text: #6d28d9;
+  --amber-surface: rgba(254, 243, 199, 0.94);
+  --amber-border: rgba(245, 158, 11, 0.28);
+  --amber-text: #b45309;
+  --red-surface: rgba(254, 226, 226, 0.94);
+  --red-border: rgba(248, 113, 113, 0.3);
+  --red-text: #b91c1c;
 }
 
 html,
@@ -103,6 +159,80 @@ select {
 .surface-subtle {
   background: var(--surface-3);
   border: 1px solid var(--border-color);
+}
+
+.button-secondary {
+  background: var(--button-neutral-bg);
+  border: 1px solid var(--button-neutral-border);
+  color: var(--button-neutral-text);
+}
+
+.button-secondary:hover:not(:disabled) {
+  background: var(--button-neutral-bg-hover);
+}
+
+.button-success {
+  background: var(--emerald-surface);
+  border: 1px solid var(--emerald-border);
+  color: var(--emerald-text);
+}
+
+.tone-indigo {
+  --tone-bg: var(--indigo-surface);
+  --tone-border: var(--indigo-border);
+  --tone-text: var(--indigo-text);
+}
+
+.tone-blue {
+  --tone-bg: var(--blue-surface);
+  --tone-border: var(--blue-border);
+  --tone-text: var(--blue-text);
+}
+
+.tone-emerald {
+  --tone-bg: var(--emerald-surface);
+  --tone-border: var(--emerald-border);
+  --tone-text: var(--emerald-text);
+}
+
+.tone-purple {
+  --tone-bg: var(--purple-surface);
+  --tone-border: var(--purple-border);
+  --tone-text: var(--purple-text);
+}
+
+.tone-cyan {
+  --tone-bg: var(--cyan-surface);
+  --tone-border: var(--cyan-border);
+  --tone-text: var(--cyan-text);
+}
+
+.tone-violet {
+  --tone-bg: var(--violet-surface);
+  --tone-border: var(--violet-border);
+  --tone-text: var(--violet-text);
+}
+
+.tone-amber {
+  --tone-bg: var(--amber-surface);
+  --tone-border: var(--amber-border);
+  --tone-text: var(--amber-text);
+}
+
+.tone-red {
+  --tone-bg: var(--red-surface);
+  --tone-border: var(--red-border);
+  --tone-text: var(--red-text);
+}
+
+.tone-surface {
+  background: var(--tone-bg);
+  border: 1px solid var(--tone-border);
+  color: var(--tone-text);
+}
+
+.tone-text {
+  color: var(--tone-text);
 }
 
 .text-primary {

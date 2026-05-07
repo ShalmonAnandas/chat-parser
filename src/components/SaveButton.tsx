@@ -51,7 +51,7 @@ export default function SaveButton({ session }: SaveButtonProps) {
     return (
       <button
         disabled
-        className="flex items-center gap-1.5 text-sm bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg"
+        className="button-success flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
@@ -66,11 +66,11 @@ export default function SaveButton({ session }: SaveButtonProps) {
       <button
         onClick={handleSave}
         disabled={loading}
-        className="flex items-center gap-1.5 text-sm bg-zinc-800 border border-zinc-700 text-zinc-300 px-3 py-1.5 rounded-lg hover:bg-zinc-700 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="button-secondary flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? (
           <>
-            <div className="w-4 h-4 border-2 border-zinc-500 border-t-transparent rounded-full animate-spin" />
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent opacity-60" />
             Saving…
           </>
         ) : (
@@ -83,7 +83,7 @@ export default function SaveButton({ session }: SaveButtonProps) {
         )}
       </button>
       {error && (
-        <span className="text-xs text-red-400">{error}</span>
+        <span className="tone-text tone-red text-xs">{error}</span>
       )}
     </div>
   );

@@ -81,7 +81,7 @@ export default function CodeChangesView({ messages }: CodeChangesViewProps) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="print:hidden flex items-center gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-400 transition-colors hover:bg-emerald-500/20"
+        className="button-success print:hidden flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm transition-opacity hover:opacity-90"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
@@ -140,7 +140,7 @@ export default function CodeChangesView({ messages }: CodeChangesViewProps) {
                 return (
                   <div key={i} className="overflow-hidden rounded-[1.5rem] border" style={{ borderColor: 'var(--border-color)' }}>
                     <div className="flex items-center gap-2 border-b px-4 py-3" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--surface-3)' }}>
-                      <svg className="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                      <svg className="tone-text tone-emerald h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                       </svg>
                       <span className="truncate text-sm font-mono text-primary" title={filePath}>
@@ -152,23 +152,23 @@ export default function CodeChangesView({ messages }: CodeChangesViewProps) {
                     <div className="p-4 space-y-3">
                       {change.kind === 'tool-call' && code?.oldStr && (
                         <div>
-                          <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.2em] text-red-400">Removed</p>
-                          <div className="rounded-lg border border-red-500/20 overflow-hidden">
+                          <p className="tone-text tone-red mb-1 text-[10px] font-medium uppercase tracking-[0.2em]">Removed</p>
+                          <div className="tone-surface tone-red overflow-hidden rounded-lg">
                             <CodeBlock code={code.oldStr} language={lang} />
                           </div>
                         </div>
                       )}
                       {change.kind === 'tool-call' && code?.newStr && (
                         <div>
-                          <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.2em] text-emerald-400">Added</p>
-                          <div className="rounded-lg border border-emerald-500/20 overflow-hidden">
+                          <p className="tone-text tone-emerald mb-1 text-[10px] font-medium uppercase tracking-[0.2em]">Added</p>
+                          <div className="tone-surface tone-emerald overflow-hidden rounded-lg">
                             <CodeBlock code={code.newStr} language={lang} />
                           </div>
                         </div>
                       )}
                       {change.kind === 'tool-call' && code?.content && !code?.oldStr && !code?.newStr && (
                         <div>
-                          <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.2em] text-blue-400">Content</p>
+                          <p className="tone-text tone-blue mb-1 text-[10px] font-medium uppercase tracking-[0.2em]">Content</p>
                           <CodeBlock
                             code={code.content}
                             language="text"
