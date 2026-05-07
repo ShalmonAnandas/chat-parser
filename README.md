@@ -16,10 +16,28 @@ A Next.js 16+ application for parsing and displaying GitHub Copilot chat export 
 
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+## GitHub Login Setup
+
+GitHub OAuth must use a callback URL that exactly matches your deployed app.
+
+1. Create a GitHub OAuth app in **GitHub Settings → Developer settings → OAuth Apps**.
+2. Set the authorization callback URL to:
+
+   ```text
+   http://localhost:3000/api/auth/callback/github
+   ```
+
+   For production, replace `http://localhost:3000` with your public app URL.
+3. Copy `.env.example` to `.env.local` and set `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, and `AUTH_SECRET`.
+4. Set `AUTH_URL` to the same public base URL you used in step 2 (for example, `https://your-domain.com`) so Auth.js generates the redirect URI that GitHub expects.
+
+If you deploy preview builds on Vercel and do not set `AUTH_URL`, the app automatically falls back to `VERCEL_PROJECT_PRODUCTION_URL` as the OAuth callback base so GitHub login can keep using one stable callback URL.
 
 ## How to Export from VS Code
 
