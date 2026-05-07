@@ -19,7 +19,7 @@ export default function MessageList({ messages }: MessageListProps) {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       {messages.map((message) =>
         message.role === 'user' ? (
           <UserMessage key={message.id} message={message} />

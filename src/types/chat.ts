@@ -17,10 +17,17 @@ export interface ToolCall {
   arguments?: Record<string, unknown> | string;
   result?: unknown;
   isError?: boolean;
+  relatedFiles?: ToolFileRef[];
   /** Human-readable description (e.g. "Read SKILL.md") */
   description?: string;
   /** Past-tense description (e.g. "Read SKILL.md") */
   pastTenseDescription?: string;
+}
+
+export interface ToolFileRef {
+  path: string;
+  fileName: string;
+  fragment?: string;
 }
 
 export interface ThinkingBlock {
@@ -33,6 +40,15 @@ export interface TextEdit {
   fileName: string;
   editCount: number;
   done: boolean;
+  patches?: TextEditPatch[];
+}
+
+export interface TextEditPatch {
+  text: string;
+  startLine: number;
+  endLine: number;
+  startColumn: number;
+  endColumn: number;
 }
 
 export interface InlineReference {
@@ -61,6 +77,7 @@ export interface ParsedMessage {
   content: string;
   timestamp?: number;
   timeTaken?: number; // ms
+  firstProgressMs?: number;
   model?: string;
   toolCalls?: ToolCall[];
   thinkingBlocks?: ThinkingBlock[];
@@ -108,8 +125,8 @@ export interface RawResponseValue {
   value?: unknown;
   content?: string;
   // toolInvocationSerialized fields
-  invocationMessage?: { value?: string };
-  pastTenseMessage?: { value?: string };
+  invocationMessage?: RawMessageMarkup;
+  pastTenseMessage?: RawMessageMarkup;
   isComplete?: boolean;
   isConfirmed?: { type?: number };
   toolCallId?: string;
@@ -117,6 +134,7 @@ export interface RawResponseValue {
   source?: { type?: string; label?: string };
   generatedTitle?: string;
   isAttachedToThinking?: boolean;
+  toolSpecificData?: Record<string, unknown>;
   // textEditGroup fields
   uri?: { path?: string; fsPath?: string };
   edits?: unknown[];
@@ -136,8 +154,21 @@ export interface RawResponseValue {
     title?: string;
     message?: string;
     options?: Array<{ label?: string; value?: string }>;
-    defaultValue?: string;
+  defaultValue?: string;
   }>;
+}
+
+export interface RawMessageMarkup {
+  value?: string;
+  uris?: Record<
+    string,
+    {
+      path?: string;
+      fsPath?: string;
+      fragment?: string;
+      scheme?: string;
+    }
+  >;
 }
 
 export interface RawRequestV1 {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ParsedMessage, ToolCall } from '@/types/chat';
+import { ParsedMessage, ToolCall, TextEdit } from '@/types/chat';
 import CodeBlock from './CodeBlock';
 
 interface CodeChangesViewProps {
@@ -9,7 +9,9 @@ interface CodeChangesViewProps {
 }
 
 interface FileChange {
-  toolCall: ToolCall;
+  kind: 'tool-call' | 'text-edit';
+  toolCall?: ToolCall;
+  textEdit?: TextEdit;
   messageIndex: number;
 }
 
@@ -57,15 +59,19 @@ function extractCode(args: ToolCall['arguments']): { oldStr?: string; newStr?: s
 export default function CodeChangesView({ messages }: CodeChangesViewProps) {
   const [open, setOpen] = useState(false);
 
-  // Collect all file-write tool calls
   const changes: FileChange[] = [];
   messages.forEach((msg, idx) => {
     if (msg.toolCalls) {
       msg.toolCalls
         .filter((tc) => tc.category === 'file-write')
         .forEach((tc) => {
-          changes.push({ toolCall: tc, messageIndex: idx });
+          changes.push({ kind: 'tool-call', toolCall: tc, messageIndex: idx });
         });
+    }
+    if (msg.textEdits) {
+      msg.textEdits.forEach((textEdit) => {
+        changes.push({ kind: 'text-edit', textEdit, messageIndex: idx });
+      });
     }
   });
 
@@ -75,7 +81,7 @@ export default function CodeChangesView({ messages }: CodeChangesViewProps) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 text-sm bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg hover:bg-emerald-500/20 transition-colors print:hidden"
+        className="print:hidden flex items-center gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-400 transition-colors hover:bg-emerald-500/20"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
@@ -85,25 +91,22 @@ export default function CodeChangesView({ messages }: CodeChangesViewProps) {
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 print:hidden">
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setOpen(false)}
           />
 
-          {/* Modal */}
-          <div className="relative w-full max-w-4xl max-h-[85vh] rounded-2xl border border-zinc-800 bg-[#0a0a0a] overflow-hidden flex flex-col">
-            {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800">
+          <div className="surface-card-strong relative flex max-h-[85vh] w-full max-w-5xl flex-col overflow-hidden rounded-[2rem]">
+            <div className="flex items-center justify-between border-b px-6 py-4" style={{ borderColor: 'var(--border-color)' }}>
               <div>
-                <h2 className="text-lg font-semibold text-white">Code Changes</h2>
-                <p className="text-xs text-zinc-500 mt-0.5">
+                <h2 className="text-lg font-semibold text-primary">Code Changes</h2>
+                <p className="mt-0.5 text-xs text-secondary">
                   {changes.length} file {changes.length === 1 ? 'operation' : 'operations'} in this session
                 </p>
               </div>
               <button
                 onClick={() => setOpen(false)}
-                className="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                className="surface-subtle flex h-9 w-9 items-center justify-center rounded-xl text-secondary transition-colors hover:text-primary"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -111,16 +114,19 @@ export default function CodeChangesView({ messages }: CodeChangesViewProps) {
               </button>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <div className="flex-1 space-y-4 overflow-y-auto p-6">
               {changes.map((change, i) => {
-                const filePath = extractFilePath(change.toolCall.arguments);
+                const filePath =
+                  change.kind === 'tool-call' && change.toolCall
+                    ? extractFilePath(change.toolCall.arguments)
+                    : change.textEdit?.uri ?? 'Unknown file';
                 const fileName = filePath.split('/').pop() ?? filePath;
-                const code = extractCode(change.toolCall.arguments);
+                const code =
+                  change.kind === 'tool-call' && change.toolCall ? extractCode(change.toolCall.arguments) : undefined;
                 const description =
-                  change.toolCall.pastTenseDescription ??
-                  change.toolCall.description ??
-                  change.toolCall.name;
+                  change.kind === 'tool-call' && change.toolCall
+                    ? change.toolCall.pastTenseDescription ?? change.toolCall.description ?? change.toolCall.name
+                    : 'Applied text edit';
 
                 // Detect language from file extension
                 const ext = fileName.split('.').pop()?.toLowerCase();
@@ -132,39 +138,37 @@ export default function CodeChangesView({ messages }: CodeChangesViewProps) {
                 const lang = (ext && langMap[ext]) || 'text';
 
                 return (
-                  <div key={i} className="rounded-xl border border-zinc-800 overflow-hidden">
-                    {/* File header */}
-                    <div className="flex items-center gap-2 px-4 py-3 bg-zinc-900/50 border-b border-zinc-800">
+                  <div key={i} className="overflow-hidden rounded-[1.5rem] border" style={{ borderColor: 'var(--border-color)' }}>
+                    <div className="flex items-center gap-2 border-b px-4 py-3" style={{ borderColor: 'var(--border-color)', backgroundColor: 'var(--surface-3)' }}>
                       <svg className="w-4 h-4 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                       </svg>
-                      <span className="text-sm font-mono text-zinc-300 truncate" title={filePath}>
+                      <span className="truncate text-sm font-mono text-primary" title={filePath}>
                         {fileName}
                       </span>
-                      <span className="text-xs text-zinc-600 ml-auto">{description}</span>
+                      <span className="ml-auto text-xs text-soft">{description}</span>
                     </div>
 
-                    {/* Code content */}
                     <div className="p-4 space-y-3">
-                      {code.oldStr && (
+                      {change.kind === 'tool-call' && code?.oldStr && (
                         <div>
-                          <p className="text-[10px] text-red-400 mb-1 uppercase tracking-wider font-medium">Removed</p>
+                          <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.2em] text-red-400">Removed</p>
                           <div className="rounded-lg border border-red-500/20 overflow-hidden">
                             <CodeBlock code={code.oldStr} language={lang} />
                           </div>
                         </div>
                       )}
-                      {code.newStr && (
+                      {change.kind === 'tool-call' && code?.newStr && (
                         <div>
-                          <p className="text-[10px] text-emerald-400 mb-1 uppercase tracking-wider font-medium">Added</p>
+                          <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.2em] text-emerald-400">Added</p>
                           <div className="rounded-lg border border-emerald-500/20 overflow-hidden">
                             <CodeBlock code={code.newStr} language={lang} />
                           </div>
                         </div>
                       )}
-                      {code.content && !code.oldStr && !code.newStr && (
+                      {change.kind === 'tool-call' && code?.content && !code?.oldStr && !code?.newStr && (
                         <div>
-                          <p className="text-[10px] text-blue-400 mb-1 uppercase tracking-wider font-medium">Content</p>
+                          <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.2em] text-blue-400">Content</p>
                           <CodeBlock
                             code={code.content}
                             language="text"
@@ -173,8 +177,33 @@ export default function CodeChangesView({ messages }: CodeChangesViewProps) {
                           />
                         </div>
                       )}
-                      {!code.oldStr && !code.newStr && !code.content && (
-                        <p className="text-xs text-zinc-600 italic">No code content available for this operation</p>
+                      {change.kind === 'text-edit' && change.textEdit?.patches && change.textEdit.patches.length > 0 && (
+                        <div className="space-y-3">
+                          {change.textEdit.patches.map((patch, patchIndex) => (
+                            <div key={patchIndex}>
+                              <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.2em] text-soft">
+                                Lines {patch.startLine}:{patch.startColumn}–{patch.endLine}:{patch.endColumn}
+                              </p>
+                              {patch.text ? (
+                                <CodeBlock
+                                  code={patch.text}
+                                  language={lang}
+                                  collapsible={patch.text.length > 240}
+                                  defaultCollapsed={patch.text.length > 240}
+                                  label="Patch"
+                                />
+                              ) : (
+                                <p className="rounded-lg px-3 py-2 text-xs italic text-soft" style={{ backgroundColor: 'var(--surface-3)' }}>
+                                  Deleted content in this range
+                                </p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {((change.kind === 'tool-call' && !code?.oldStr && !code?.newStr && !code?.content) ||
+                        (change.kind === 'text-edit' && (!change.textEdit?.patches || change.textEdit.patches.length === 0))) && (
+                        <p className="text-xs italic text-soft">No patch content available for this operation</p>
                       )}
                     </div>
                   </div>
