@@ -27,6 +27,37 @@ function parseTimestamp(ts?: string | number): number | undefined {
   return isNaN(parsed) ? undefined : parsed;
 }
 
+function maxDefined(...values: Array<number | undefined>): number | undefined {
+  const defined = values.filter((value): value is number => typeof value === 'number');
+  if (defined.length === 0) return undefined;
+  return Math.max(...defined);
+}
+
+function durationBetween(start?: number, end?: number): number | undefined {
+  if (start == null || end == null || end < start) return undefined;
+  return end - start;
+}
+
+function findLatestNestedTimestamp(value: unknown): number | undefined {
+  if (!value || typeof value !== 'object') return undefined;
+
+  if (Array.isArray(value)) {
+    return maxDefined(...value.map(findLatestNestedTimestamp));
+  }
+
+  const obj = value as Record<string, unknown>;
+  const directTimestamp = parseTimestamp(
+    typeof obj.timestamp === 'string' || typeof obj.timestamp === 'number' ? obj.timestamp : undefined
+  );
+
+  return maxDefined(
+    directTimestamp,
+    ...Object.entries(obj)
+      .filter(([key]) => key !== 'timestamp')
+      .map(([, nestedValue]) => findLatestNestedTimestamp(nestedValue))
+  );
+}
+
 function extractTextContent(content: unknown): string {
   if (typeof content === 'string') return content;
   if (Array.isArray(content)) {
@@ -277,12 +308,20 @@ function parseV1Format(raw: RawSessionV1): ParsedSession {
           : undefined,
       }));
 
-      // Time taken: prefer result.timings (new format), then response fields, then diff
-      const timeTaken =
-        req.result?.timings?.totalElapsed ??
-        responseObj?.timeTaken ??
-        responseObj?.result?.timings?.totalElapsed ??
-        (userTs && assistantTs ? assistantTs - userTs : undefined);
+      const latestResponseTs = maxDefined(
+        assistantTs,
+        findLatestNestedTimestamp(resp),
+        findLatestNestedTimestamp(req.result)
+      );
+      const elapsedFromTimestamps = durationBetween(userTs, latestResponseTs);
+
+      // Time taken: use the longest available duration so tool work is included when present.
+      const timeTaken = maxDefined(
+        req.result?.timings?.totalElapsed,
+        responseObj?.timeTaken,
+        responseObj?.result?.timings?.totalElapsed,
+        elapsedFromTimestamps
+      );
 
       // Model: prefer top-level modelId (new format), then response fields
       const agentName =
@@ -293,7 +332,7 @@ function parseV1Format(raw: RawSessionV1): ParsedSession {
         id: generateId(),
         role: 'assistant',
         content,
-        timestamp: assistantTs ?? (userTs && timeTaken ? userTs + timeTaken : undefined),
+        timestamp: latestResponseTs ?? (userTs && timeTaken ? userTs + timeTaken : undefined),
         timeTaken,
         model,
         toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
